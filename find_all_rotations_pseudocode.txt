@@ -1,0 +1,96 @@
+FIND_ALL_ROTATIONS(men_preferences, women_preferences, n):
+	rotations_list = NEW_EMPTY_LIST()
+	m_i = GALE-SHAPLEY(n,men_preferences,women_preferences)
+	bottom_matching = GALE-SHAPLEY(n,women_preferences,men_preferences)
+	marking = int[n] //-1 = unmarked, n è marked ma senza niente associato, altri sono la donna precedente
+	for j=0; j<n:
+		marking[j]=-1
+	w = -1
+	M = int[n]
+	men_preferences_indexes = int[n]
+	for j=0; j<n:
+		k = 0
+		while men_preferences[k]!=m_i[j]:
+			k++
+		men_preferences_indexes[j]=k
+	
+	while True:
+		//STEP 1
+		m = -1
+		for j = 0; j<n:
+			if m_i[j]!=bottom_matching[j]:
+				m = j
+				break
+		if m<0:
+			break
+		while marking[w]!=-1:
+			t = w
+			w = marking[w]//assicuriamoci che qui non possa mai essere n
+			marking[t]=-1
+		
+		//STEP 2
+		for j=0; j<n:
+			M[j]=m_i[j]
+		w = M[m]
+		marking[w]=n
+		//continua con chiamata o continuazione di breakmarriage modificato...
+
+BREAKMARRIAGE(M, m, n, men_preferences, men_preferences_indexes, women_preferences, marking, rotations_list):
+	i = 0
+	while men_preferences[m][i]!=M[m]
+		i++
+	men_preferences_indexes[m]=i+1
+	former_wife = M[m] //il w dell'articolo
+	reversed_M = int[n]
+	for i = 0; i< n:
+		reversed_M[M[i]]=i
+	previous_woman = n
+	
+	while True do
+		//itero sulle preferenze di m
+		//m diventa m' dell'articolo all'iterno del ciclo
+		for i = men_preferences_indexes[m][i]; i < n do
+			w = men_preferences[m][i] //il w' dell'articolo
+			//w non è la donna iniziale, prendo m1 (attuale compagno di w) e lo confronto con m
+			m1 = reversed_M[w]
+			//se w preferisce m a m1, sciolgo (w,m1) e creo (w,m)
+			if TEST(women_preferences, n, w, m, m1) then
+				reversed_M[w] = m
+				k = men_preferences_indexes[m]
+				while men_preferences[k]!=w:
+					k++
+				men_preferences_indexes[m]=k
+				m = m1
+				if marking[w]<0:
+					marking[w] = previous_woman
+					previous_woman = w
+				else:
+					PAUSE_BREAKMARRIAGE(...)
+				break
+				
+				//se è la donna sposata con l'm iniziale, terminiamo
+				if w == former_wife:
+						return
+
+PAUSE_BREAKMARRIAGE(marking, M, reversed_M, rotations_list, w, previous_woman): //w è w' dell'articolo
+	prev_list_el = NULL
+	w2 = w
+	go_on = True
+	while w2!=w and go_on:
+		go_on = w2==w
+		//costruire lista della rotazione
+		list_el = NEW_LIST_EL()
+		list_el.value = (reversed_M[w2],w2)
+		list_el.next = prev_list_el
+		prev_list_el = list_el
+		//modificare M
+		M[reversed_M[w2]]=w2
+		//resettare marking
+		marking[w2]=-1
+		//update previous_woman
+		w2 = previous_woman
+		previous_woman = marking[w2]
+		
+	rotations_list.append(prev_list_el)
+	
+	return
