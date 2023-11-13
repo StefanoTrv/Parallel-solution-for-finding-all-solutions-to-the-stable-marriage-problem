@@ -6,7 +6,6 @@ FIND_ALL_ROTATIONS(men_preferences, women_preferences, n):
 	for j=0; j<n:
 		marking[j]=-1
 	w = -1
-	M = int[n]
 	men_preferences_indexes = int[n]
 	for j=0; j<n:
 		k = 0
@@ -17,23 +16,17 @@ FIND_ALL_ROTATIONS(men_preferences, women_preferences, n):
 	while True:
 		//STEP 1
 		m = -1
-		for j = 0; j<n:
+		for j = 0; j<n: //troviamo il primo uomo diverso tra m_i e bottom_matching
 			if m_i[j]!=bottom_matching[j]:
 				m = j
 				break
-		if m<0:
+		if m<0: // m_i == bottom_matching
 			break
-		while marking[w]!=-1:
-			t = w
-			w = marking[w]//assicuriamoci che qui non possa mai essere n
-			marking[t]=-1
 		
 		//STEP 2
-		for j=0; j<n:
-			M[j]=m_i[j]
-		w = M[m]
+		w = m_i[m]
 		marking[w]=n
-		//continua con chiamata o continuazione di breakmarriage modificato...
+		BREAKMARRIAGE(m_i,m,n,men_preferences,men_preferences_indexes,women_preferences,marking,rotations_list)
 
 BREAKMARRIAGE(M, m, n, men_preferences, men_preferences_indexes, women_preferences, marking, rotations_list):
 	i = 0
@@ -42,11 +35,14 @@ BREAKMARRIAGE(M, m, n, men_preferences, men_preferences_indexes, women_preferenc
 	men_preferences_indexes[m]=i+1
 	former_wife = M[m] //il w dell'articolo
 	reversed_M = int[n]
+	old_reversed_M = int[n]
 	for i = 0; i< n:
 		reversed_M[M[i]]=i
+		old_reversed_M[M[i]]=i
 	previous_woman = n
 	
 	while True do
+		breakmarriage_fail = True
 		//itero sulle preferenze di m
 		//m diventa m' dell'articolo all'iterno del ciclo
 		for i = men_preferences_indexes[m][i]; i < n do
@@ -54,25 +50,33 @@ BREAKMARRIAGE(M, m, n, men_preferences, men_preferences_indexes, women_preferenc
 			//w non è la donna iniziale, prendo m1 (attuale compagno di w) e lo confronto con m
 			m1 = reversed_M[w]
 			//se w preferisce m a m1, sciolgo (w,m1) e creo (w,m)
-			if TEST(women_preferences, n, w, m, m1) then
-				reversed_M[w] = m
-				k = men_preferences_indexes[m]
+			if marking[w]<0 and TEST(women_preferences, n, w, m, m1):
+				k = men_preferences_indexes[m] //aggiorniamo indice per efficienza
 				while men_preferences[k]!=w:
 					k++
 				men_preferences_indexes[m]=k
-				m = m1
-				if marking[w]<0:
-					marking[w] = previous_woman
-					previous_woman = w
+				reversed_M[w] = m
+				marking[w] = previous_woman
+				previous_woman = w
+				m=m1 //nuovo uomo non accoppiato
+			else if TEST(women_preferences, n, w, m, old_reversed_M[w]):
+				old_marking = marking[w]
+				PAUSE_BREAKMARRIAGE(marking, M, reversed_M, old_reversed_M, rotations_list, w, previous_woman)
+				if former_wife == w: //w = w'
+					reversed_M[w] = m
+					return //al passo 1
 				else:
-					PAUSE_BREAKMARRIAGE(...)
-				break
-				
-				//se è la donna sposata con l'm iniziale, terminiamo
-				if w == former_wife:
-						return
+					if TEST(women_preferences, n, w, m, m1):
+						m = m1
+						breakmarriage_fail = False
+						break
+					else:
+						marking[w]=old_marking
+						continue
+		if breakmarriage_fail://non abbiamo trovato un accoppiamento stabile per m
+			return
 
-PAUSE_BREAKMARRIAGE(marking, M, reversed_M, rotations_list, w, previous_woman): //w è w' dell'articolo
+PAUSE_BREAKMARRIAGE(marking, M, reversed_M, old_reversed_M, rotations_list, w, previous_woman): //w è w' dell'articolo
 	prev_list_el = NULL
 	w2 = w
 	go_on = True
@@ -80,11 +84,13 @@ PAUSE_BREAKMARRIAGE(marking, M, reversed_M, rotations_list, w, previous_woman): 
 		go_on = w2==w
 		//costruire lista della rotazione
 		list_el = NEW_LIST_EL()
-		list_el.value = (reversed_M[w2],w2)
+		list_el.value = (old_reversed_M[w2],w2)
 		list_el.next = prev_list_el
 		prev_list_el = list_el
-		//modificare M
-		M[reversed_M[w2]]=w2
+		//aggiorniamo old_reversed_M (i = i + 1)
+		old_reversed_M[w2]=reversed_M[w2]
+		//aggiorna M
+		M[old_reversed_M[w2]]=w2
 		//resettare marking
 		marking[w2]=-1
 		//update previous_woman
