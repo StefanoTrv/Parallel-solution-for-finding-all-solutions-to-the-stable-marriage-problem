@@ -27,6 +27,8 @@ FIND_ALL_ROTATIONS(men_preferences, women_preferences, n):
 		w = m_i[m]
 		marking[w]=n
 		BREAKMARRIAGE(m_i,m,n,men_preferences,men_preferences_indexes,women_preferences,marking,rotations_list)
+	
+	return rotations_list
 
 BREAKMARRIAGE(M, m, n, men_preferences, men_preferences_indexes, women_preferences, marking, rotations_list):
 	i = 0
