@@ -1,0 +1,89 @@
+ALL_STABLE_MATCHINGS(n, men_preferences, women_preferences):
+	top_matching = GALE_SHAPLEY(n, men_preferences, women_preferences)
+	
+	//da creare il grafo delle rotazioni direttamente o a partire dalla lista
+	rotations_list = FIND_ALL_ROTATIONS(men_preferences, women_preferences, n)
+	//...
+	//serve ricavare anche la lista dei nodi liberi, cioè i nodi del grafo che non hanno predecessori
+	//rotations_graph è il grafo delle rotazioni
+	//free_rotations_list è questa lista di nodi
+	
+	results_tree = NEW_NODE()
+	results_tree.value = top_matching
+	
+	RECURSIVE_SEARCH(top_matching,n,rotations_graph,free_rotations_list,results_tree)
+	
+	return results_tree
+	
+RECURSIVE_SEARCH(matching,n,rotations_graph,free_rotations_list,results_tree):
+	current_rotation_list_el = free_rotations_list
+	while current_rotation_list_el != NULL:
+		
+		//applica la rotazione
+		rotation = current_rotation_list_el.value.value //ricavo la rotazione nel nodo in quell'elemento della lista
+		
+		first_woman = rotation.value[1]
+		while rotation.next!=NULL:
+			matching[rotation.value[0]]=rotation.next.value[1]
+			rotation = rotation.next
+		matching[rotation.value[0]]=first_woman
+		
+		//controlla se c'è già nell'albero
+		is_new_matching = CHECK_AND_ADD_TO_TREE(matching,results_tree,n)
+		
+		if is_new_matching: //se è nuovo
+			//aggiorno le rotazioni in due passi
+			//1: aggiungo le nuove rotazioni
+			list_head = free_rotations_list
+			for successor in current_rotation_list_el.value.successors:
+				successor.missing_predecessors -= 1
+				if successor.missing_predecessors == 0:
+					//aggiungi questa rotazione in cima lista
+					new_list_el = NEW_LIST_ELEMENT()
+					new_list_el.value = successor
+					new_list_el.next = list_head
+					list_head.previous = new_list_el
+					list_head = new_list_el
+			
+			//2: rimuovo la rotazione appena applicata dalla lista
+			new_free_rotations_list = list_head
+			previous_element = current_rotation_list_el.previous
+			next_element = current_rotation_list_el.next
+			if previous_element == NULL and next_element == NULL:
+				new_free_rotations_list = NULL
+			else if previous_element == NULL:
+				new_free_rotations_list = next_element
+				next_element.previous = NULL
+			else if next_element == NULL:
+				previous_element.next = NULL
+			else:
+				previous_element.next = next_element
+				next_element.previous = previous_element
+			
+			//chiamata ricorsiva
+			RECURSIVE_SEARCH(matching,n,rotations_graph,new_free_rotations_list,results_tree)
+			
+			//ripristino le rotazioni
+			//1: rimuovo le nuove rotazioni
+			for successor in current_rotation_list_el.value.successors:
+				successor.missing_predecessors += 1
+			free_rotations_list.previous = NULL //attenzione alle memory leak!
+			//2: inserisco nuovamente la rotazione rimossa
+			if previous_element == NULL:
+				next_element.previous = current_rotation_list_el
+			else if next_element == NULL:
+				previous_element.next = current_rotation_list_el
+			else:
+				previous_element.next = current_rotation_list_el
+				next_element.previous = current_rotation_list_el
+			
+		
+		//ripristina rotazione
+		rotation = current_rotation_list_el.value.value
+		while rotation.next!=NULL:
+			matching[rotation.value[0]]=rotation.value[1]
+			rotation = rotation.next
+		
+		current_rotation_list_el = current_rotation_list_el.next
+	
+	
