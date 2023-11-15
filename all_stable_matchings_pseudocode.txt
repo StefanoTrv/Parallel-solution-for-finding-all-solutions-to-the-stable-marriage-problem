@@ -2,20 +2,18 @@ ALL_STABLE_MATCHINGS(n, men_preferences, women_preferences):
 	top_matching = GALE_SHAPLEY(n, men_preferences, women_preferences)
 	
 	//da creare il grafo delle rotazioni direttamente o a partire dalla lista
-	rotations_list = FIND_ALL_ROTATIONS(men_preferences, women_preferences, n)
-	//...
+	free_rotations_list = FIND_ALL_ROTATIONS(men_preferences, women_preferences, n)
 	//serve ricavare anche la lista dei nodi liberi, cioè i nodi del grafo che non hanno predecessori
-	//rotations_graph è il grafo delle rotazioni
 	//free_rotations_list è questa lista di nodi
 	
 	results_tree = NEW_NODE()
 	results_tree.value = top_matching
 	
-	RECURSIVE_SEARCH(top_matching,n,rotations_graph,free_rotations_list,results_tree)
+	RECURSIVE_SEARCH(top_matching,n,free_rotations_list,results_tree)
 	
 	return results_tree
 	
-RECURSIVE_SEARCH(matching,n,rotations_graph,free_rotations_list,results_tree):
+RECURSIVE_SEARCH(matching,n,free_rotations_list,results_tree):
 	current_rotation_list_el = free_rotations_list
 	while current_rotation_list_el != NULL:
 		
@@ -61,7 +59,7 @@ RECURSIVE_SEARCH(matching,n,rotations_graph,free_rotations_list,results_tree):
 				next_element.previous = previous_element
 			
 			//chiamata ricorsiva
-			RECURSIVE_SEARCH(matching,n,rotations_graph,new_free_rotations_list,results_tree)
+			RECURSIVE_SEARCH(matching,n,new_free_rotations_list,results_tree)
 			
 			//ripristino le rotazioni
 			//1: rimuovo le nuove rotazioni
@@ -85,5 +83,3 @@ RECURSIVE_SEARCH(matching,n,rotations_graph,free_rotations_list,results_tree):
 			rotation = rotation.next
 		
 		current_rotation_list_el = current_rotation_list_el.next
-	
-	
