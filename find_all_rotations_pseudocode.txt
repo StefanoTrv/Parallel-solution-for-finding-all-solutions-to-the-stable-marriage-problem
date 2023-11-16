@@ -48,7 +48,7 @@ BREAKMARRIAGE(M, m, n, men_preferences, men_preferences_indexes, women_preferenc
 		breakmarriage_fail = True
 		//itero sulle preferenze di m
 		//m diventa m' dell'articolo all'iterno del ciclo
-		for i = men_preferences_indexes[m][i]; i < n do
+		for i = men_preferences_indexes[m]; i < n do
 			w = men_preferences[m][i] //il w' dell'articolo
 			//prendo m1 (attuale compagno di w) e lo confronto con m
 			m1 = reversed_M[w]
@@ -62,6 +62,7 @@ BREAKMARRIAGE(M, m, n, men_preferences, men_preferences_indexes, women_preferenc
 				marking[w] = previous_woman
 				previous_woman = w
 				m=m1 //nuovo uomo non accoppiato
+				break
 			else if TEST(women_preferences, n, w, m, old_reversed_M[w]): //step 2b
 				old_marking = marking[w]
 				PAUSE_BREAKMARRIAGE(marking, M, reversed_M, old_reversed_M, free_rotations_list, w, previous_woman,last_to_have_modified)
