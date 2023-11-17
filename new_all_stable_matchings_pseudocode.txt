@@ -1,10 +1,9 @@
 ALL_STABLE_MATCHINGS(n, men_preferences, women_preferences):
 	top_matching = GALE_SHAPLEY(n, men_preferences, women_preferences)
 	
-	//da creare il grafo delle rotazioni direttamente o a partire dalla lista
+	//crea il grafo delle rotazioni
 	free_rotations_list = FIND_ALL_ROTATIONS(men_preferences, women_preferences, n)
-	//serve ricavare anche la lista dei nodi liberi, cioè i nodi del grafo che non hanno predecessori
-	//free_rotations_list è questa lista di nodi
+	//free_rotations_list è la lista dei nodi liberi, cioè i nodi del grafo che non hanno predecessori
 	
 	results_list = NEW_LIST()
 	results_list.append(top_matching)

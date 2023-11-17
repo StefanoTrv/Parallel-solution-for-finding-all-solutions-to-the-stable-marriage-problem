@@ -4,6 +4,10 @@ FIND_ALL_ROTATIONS(men_preferences, women_preferences, n):
 	m_i = GALE-SHAPLEY(n,men_preferences,women_preferences)
 	bottom_matching = GALE-SHAPLEY(n,women_preferences,men_preferences)
 	marking = int[n] //-1 = unmarked, n è marked ma senza niente associato, altri sono la donna precedente
+	rotation_index = 0 //per indicizzare le rotazioni su already_added_predecessors
+	already_added_predecessors = bool[n*n] //per ridurre il numero di archi nel grafo delle rotazioni
+	for j=0; j<n*n:
+		already_added_predecessors[j]=False
 	for j=0; j<n:
 		marking[j]=-1
 		last_to_have_modified[j]=NULL
@@ -27,11 +31,11 @@ FIND_ALL_ROTATIONS(men_preferences, women_preferences, n):
 		//STEP 2
 		w = m_i[m]
 		marking[w]=n
-		BREAKMARRIAGE(m_i,m,n,men_preferences,men_preferences_indexes,women_preferences,marking,free_rotations_list,last_to_have_modified)
+		BREAKMARRIAGE(m_i,m,n,men_preferences,men_preferences_indexes,women_preferences,marking,free_rotations_list,last_to_have_modified,*rotation_index,already_added_predecessors)
 	
 	return free_rotations_list.first
 
-BREAKMARRIAGE(M, m, n, men_preferences, men_preferences_indexes, women_preferences, marking, free_rotations_list,last_to_have_modified):
+BREAKMARRIAGE(M, m, n, men_preferences, men_preferences_indexes, women_preferences, marking, free_rotations_list, last_to_have_modified, *rotation_index,already_added_predecessors):
 	i = 0
 	while men_preferences[m][i]!=M[m]
 		i++
@@ -65,7 +69,7 @@ BREAKMARRIAGE(M, m, n, men_preferences, men_preferences_indexes, women_preferenc
 				break
 			else if TEST(women_preferences, n, w, m, old_reversed_M[w]): //step 2b
 				old_marking = marking[w]
-				PAUSE_BREAKMARRIAGE(marking, M, reversed_M, old_reversed_M, free_rotations_list, w, previous_woman,last_to_have_modified)
+				PAUSE_BREAKMARRIAGE(marking, M, reversed_M, old_reversed_M, free_rotations_list, w, previous_woman,last_to_have_modified,*rotation_index,already_added_predecessors)
 				if former_wife == w: //3c: w = w'
 					reversed_M[w] = m
 					return //al passo 1
@@ -80,12 +84,16 @@ BREAKMARRIAGE(M, m, n, men_preferences, men_preferences_indexes, women_preferenc
 		if breakmarriage_fail://non abbiamo trovato un accoppiamento stabile per m
 			return
 
-PAUSE_BREAKMARRIAGE(marking, M, reversed_M, old_reversed_M, free_rotations_list, w, previous_woman,last_to_have_modified): //w è w' dell'articolo
+PAUSE_BREAKMARRIAGE(marking, M, reversed_M, old_reversed_M, free_rotations_list, w, previous_woman,last_to_have_modified, *rotation_index,already_added_predecessors): //w è w' dell'articolo
 	no_predecessors = True
 	prev_list_el = NULL
 	w2 = w
 	go_on = True
 	rotation_node = NEW_NODE()
+	rotation_node.missing_predecessors = 0
+	rotation_node.index = *rotation_index
+	*rotation_index += 1
+	predecessors_list = NEW_LIST() //i predecessori del nodo che stiamo creando, per poter resettare already_added_predecessors
 	while w2!=w and go_on:
 		go_on = w2==w
 		//costruire lista della rotazione dalla coda alla testa
@@ -96,8 +104,15 @@ PAUSE_BREAKMARRIAGE(marking, M, reversed_M, old_reversed_M, free_rotations_list,
 		//aggiorniamo predecessori e last_to_have_modified
 		new_successor = NEW_LIST_EL()
 		new_successor.value = rotation_node
-		new_successor.next = last_to_have_modified[old_reversed_M[w2]].successors
-		last_to_have_modified[old_reversed_M[w2]].successors = new_successor
+		if last_to_have_modified[old_reversed_M[w2]]!=NULL and not already_added_predecessors[last_to_have_modified[old_reversed_M[w2]].index]: //aggiungiamo la rotazione solo una volta ad ogni predecessore
+			new_successor.next = last_to_have_modified[old_reversed_M[w2]].successors
+			last_to_have_modified[old_reversed_M[w2]].successors = new_successor
+			no_predecessors = False
+			rotation_node.missing_predecessors += 1
+			already_added_predecessors[last_to_have_modified[old_reversed_M[w2]].index] = True
+			predecessors_list.append(last_to_have_modified[old_reversed_M[w2]])
+		else:
+			new_successor.next = NULL
 		last_to_have_modified[old_reversed_M[w2]] = rotation_node
 		//aggiorniamo old_reversed_M (i = i + 1)
 		old_reversed_M[w2]=reversed_M[w2]
@@ -115,5 +130,12 @@ PAUSE_BREAKMARRIAGE(marking, M, reversed_M, old_reversed_M, free_rotations_list,
 		new_list_el = NEW_LIST_EL()
 		new_list_el.value  = rotation_node
 		free_rotations_list.append(new_list_el)
+	
+	//ripristiniamo already_added_predecessors
+	list_el = predecessors_list.first
+	while list_el != NULL:
+		already_added_predecessors[list_el.value.index]=False
+	
+	//Se necessario, si liberi la memoria di predecessors_list
 			
 	return
