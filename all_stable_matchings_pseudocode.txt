@@ -55,7 +55,7 @@ RECURSIVE_SEARCH(matching,n,free_rotations_list,results_list):
 		
 		//ripristina rotazione
 		rotation = free_rotations_list.value.value
-		while rotation.next!=NULL:
+		while rotation!=NULL:
 			matching[rotation.value[0]]=rotation.value[1]
 			rotation = rotation.next
 		
