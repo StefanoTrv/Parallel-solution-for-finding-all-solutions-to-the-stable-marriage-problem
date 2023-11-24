@@ -27,7 +27,7 @@ ALL_STABLE_MATCHINGS(n, men_preferences, women_preferences):
 	
 	//compatta memoria
 	
-	return [...]
+	return [...] //ritorna i risultati compattati
 	
 PARALLEL_RECURSIVE_SEARCH(matching,n,free_rotations_list,mem_list,missing_predecessors,remaining_rotations):
 	if IS_MEMORY_REQUIRED_BY_GRID_TOO_BIG(remaining_rotations,[...]: //basato sulle proprietà del device e parametri passati al momemento del lancio
@@ -90,7 +90,7 @@ PARALLEL_RECURSIVE_SEARCH(matching,n,free_rotations_list,mem_list,missing_predec
 			grid_dimension *= 2
 		grid_dimension -= 1 //togliamo il matching di partenza
 		
-		-> Lancio sincrono di grid_dimension kernel con i dati [...]
+		-> Lancio sincrono di grid_dimension kernel con i dati matching, n, free_rotations_list, missing_predecessors, grid_dimension, allocando lo spazio in memoria per i risultati (si usa l'upper bound per la dimensione)
 		
 		results_dim = COPY_AN_INTEGER_FROM_DEVICE_RESULTS()
 		
@@ -104,3 +104,42 @@ PARALLEL_RECURSIVE_SEARCH(matching,n,free_rotations_list,mem_list,missing_predec
 		mem_list.append(t_mem)
 		mem_list.append(new_matching)
 		
+//CODICE DEVICE
+//ogni KERNEL ha la propria copia indipendente di matching e missing_predecessors, il resto è condiviso con il resto della grid
+*int results //zona in memoria per i risultati, condivisa da grid e grid figlie
+*int memory_pointer //condivisa in tutta la grid (non nelle grid figlie però)
+KERNEL(matching, n, free_rotations_list, missing_predecessors, grid_dimension):
+	if this_thread.index == 0:
+		memory_pointer = ATOMIC_FETCH_AND_INCREASE(results,grid_dimension * n * size_of (int)) //prende il puntatore al primo punto libero nella memoria dei risultati e poi lo incrementa di grid_dimension, in modo atomico
+	SYNCRONIZE_GRID()
+	int bitmap = this_thread.index + 1
+	int i = 0
+	new_free_rotations_list = NULL
+	number_of_new_exposed_rotations = 0
+	//applica tutte le rotazioni di questo thread
+	for r in free_rotations_list:
+		if (bitmap >> i) << (size_of (int) -1) > 0:
+			//applica la rotazione
+			rotation = r.value
+			first_woman = rotation.value[1]
+			while rotation.next!=NULL:
+				matching[rotation.value[0]]=rotation.next.value[1]
+				rotation = rotation.next
+			matching[rotation.value[0]]=first_woman
+			//aggiorna missing_predecessors e costruisce la nuova lista delle rotazioni libere
+			for successor in rotation_node.successors:
+				missing_predecessors[successor.index] -= 1
+				if missing_predecessors[successor.index] == 0:
+					//aggiungi questa rotazione in cima lista
+					t_new_free_rotations_list = NEW_LIST_ELEMENT()
+					t_new_free_rotations_list.value = successor
+					t_new_free_rotations_list.next = new_free_rotations_list
+					new_free_rotations_list = t_new_free_rotations_list
+					number_of_new_exposed_rotations++
+	MEM_COPY(matching, memory_pointer + this_thread.index * size_of (int) * n)
+	new_grid_dimension = 1
+	for i=0; i<number_of_new_exposed_rotations; i++:
+		new_grid_dimension *= 2
+	new_grid_dimension -= 1 //togliamo il matching appena calcolato
+	if new_grid_dimension > 0: 
+		-> Lancia new_grid_dimension nuovi kernel, con i dati matching, n, new_free_rotations_list, missing_predecessors, new_grid_dimension
