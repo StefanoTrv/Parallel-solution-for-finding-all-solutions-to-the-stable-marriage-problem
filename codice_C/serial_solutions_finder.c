@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "input_output.h"
+#include "logic\serial_functions.h"
 
 
 int main(int argc, char* argv[]) {
@@ -13,17 +14,26 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int* n;
-    int** men_preferences;
-    int** women_preferences; 
- 
-    read_input(ptr, n, men_preferences, women_preferences);
+    int n = read_dimension(ptr);
+    int** men_preferences = matrix_alloc(n);
+    int** women_preferences = matrix_alloc(n); 
+    fill_matrices(ptr, n, men_preferences, women_preferences);
     fclose(ptr);
 
-    int* top_matching = gale_shapley(*n, men_preferences, women_preferences);
+    /*
+    printf("%d\n\n", n);
+    print_matrix(men_preferences, n);
+    printf("\n");
+    print_matrix(women_preferences, n);
+    printf("\n");
+    */
+   
+    int* top_matching = gale_shapley(n, men_preferences, women_preferences);
+    /*
     for (int i = 0; i < n; i++) {
         printf("%d %d\n", i, top_matching[i]);
     }
+    */
 
     matrix_free(men_preferences, n);
     matrix_free(women_preferences, n);

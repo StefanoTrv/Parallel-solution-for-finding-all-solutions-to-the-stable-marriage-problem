@@ -1,3 +1,9 @@
+#include <stdlib.h>
+
+
+int test(int**, int, int, int, int);
+
+
 int* gale_shapley(int n, int** men_preferences, int** women_preferences) {
     int women_partners[n], men_free[n];
     for (int i = 0; i < n; i++) {

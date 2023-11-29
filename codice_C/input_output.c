@@ -3,9 +3,14 @@
 #include <string.h>
 
 
-void read_input(FILE* ptr, int* n, int** men_preferences, int** women_preferences) {
+int read_dimension(FILE* ptr) {
+    int n;
     fscanf(ptr, "%d", &n);
-    matrix_alloc(n);
+    return n;
+}
+
+
+void fill_matrices(FILE* ptr, int n, int** men_preferences, int** women_preferences) {
     fgetc(ptr);
     for (int i = 0; i < n; i++){
         for (int j = 0; j < n; j++){
@@ -37,3 +42,12 @@ void matrix_free(int** matrix, int n) {
     free(matrix);
 }
 
+
+void print_matrix(int** matrix, int dim) {
+    for (int i = 0; i < dim; i++) {
+        for (int j = 0; j < dim; j++) {
+            printf("%d ", matrix[i][j]);
+        }
+        printf("\n");
+    }
+}
