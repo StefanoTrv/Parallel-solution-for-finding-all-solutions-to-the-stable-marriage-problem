@@ -1,39 +1,39 @@
 struct ResultsList {
-	ResultsListElement* first;
-	ResultsListElement* last;
+	struct ResultsListElement* first;
+	struct ResultsListElement* last;
 }
 
 struct ResultsListElement {
 	char* value;	//il matching
-	ResultsListElement* next;
+	struct ResultsListElement* next;
 }
 
 struct RotationList { //list_el
 	char man;
 	char woman;
-	RotationList* next;
+	struct RotationList* next;
 }
 
 struct RotationNode {
-	RotationList* rotation;
+	struct RotationList* rotation;
 	int index;
 	int missing_predecessors;
-	SuccessorsList* successors;
+	struct SuccessorsList* successors;
 }
 
 struct SuccessorsList {
-	RotationNode* value;
-	SuccessorsList* next;
+	struct RotationNode* value;
+	struct SuccessorsList* next;
 }
 
 struct RotationsList { //free_rotations_list
-	RotationsListElement* first;
-	RotationsListElement* last;
+	struct RotationsListElement* first;
+	struct RotationsListElement* last;
 }
 
 struct RotationsListElement { //free_rotations_list
-	RotationNode* value;
-	ResultsListElement* next;
+	struct RotationNode* value;
+	struct ResultsListElement* next;
 }
 
 void appendResultsList(struct ResultsList* list, char* result){
