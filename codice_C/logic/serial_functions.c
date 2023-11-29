@@ -38,3 +38,16 @@ int* gale_shapley(int n, int** men_preferences, int** women_preferences) {
     }
     return matching;
 }
+
+
+int test(int** women_preferences, int n, int w, int m, int m1) {
+    for (int i = 0; i < n; i++) {
+        if (women_preferences[w][i] == m) {
+            return 1;
+        }
+        if (women_preferences[w][i] == m1) {
+            return 0;
+        }
+    }
+    return 0;
+}
