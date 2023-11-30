@@ -1,10 +1,12 @@
 #include <stdlib.h>
 
 
-int test(int**, int, int, int, int);
+int test(int*, int, int, int, int);
+int* gale_shapley(int, int*, int*);
+void recursive_search(char*, int, struct RotationsListElement*, struct ResultsList*);
 
 
-int* gale_shapley(int n, int** men_preferences, int** women_preferences) {
+int* gale_shapley(int n, int* men_preferences, int* women_preferences) {
     int women_partners[n], men_free[n];
     for (int i = 0; i < n; i++) {
         women_partners[i] = -1;
@@ -125,7 +127,7 @@ void recursive_search(char* matching, int n, struct RotationsListElement* free_r
 	}
 }
 
-int test(int** women_preferences, int n, int w, int m, int m1) {
+int test(int* women_preferences, int n, int w, int m, int m1) {
     for (int i = 0; i < n; i++) {
         if (women_preferences[w][i] == m) {
             return 1;
