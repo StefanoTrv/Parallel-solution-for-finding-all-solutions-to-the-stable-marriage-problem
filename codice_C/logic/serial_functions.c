@@ -2,11 +2,11 @@
 
 
 int test(int*, int, int, int, int);
-int* gale_shapley(int, int*, int*);
+char* gale_shapley(int, int*, int*);
 void recursive_search(char*, int, struct RotationsListElement*, struct ResultsList*);
 
 
-int* gale_shapley(int n, int* men_preferences, int* women_preferences) {
+char* gale_shapley(int n, int* men_preferences, int* women_preferences) {
     int women_partners[n], men_free[n];
     for (int i = 0; i < n; i++) {
         women_partners[i] = -1;
@@ -40,8 +40,8 @@ int* gale_shapley(int n, int* men_preferences, int* women_preferences) {
             }
         }
     }
-    int* matching = malloc(n * sizeof(int));
-    for (int i = 0; i < n; i++) {
+    char* matching = malloc(n * sizeof(char));
+    for (char i = 0; i < n; i++) {
         matching[women_partners[i]] = i;
     }
     return matching;
