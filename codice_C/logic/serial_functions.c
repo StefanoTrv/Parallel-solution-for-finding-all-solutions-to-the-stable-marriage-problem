@@ -3,6 +3,7 @@
 
 int test(int*, int, int, int, int);
 char* gale_shapley(int, int*, int*);
+RotationsList* find_all_rotations(int*, int*, int, char*);
 void recursive_search(char*, int, struct RotationsListElement*, struct ResultsList*);
 
 
@@ -46,6 +47,71 @@ char* gale_shapley(int n, int* men_preferences, int* women_preferences) {
     }
     return matching;
 }
+
+
+int test(int* women_preferences, int n, int w, int m, int m1) {
+    for (int i = 0; i < n; i++) {
+        if (women_preferences[w][i] == m) {
+            return 1;
+        }
+        if (women_preferences[w][i] == m1) {
+            return 0;
+        }
+    }
+    return 0;
+}
+
+
+RotationsList* find_all_rotations(int* men_preferences, int* women_preferences, int n, char* top_matching) {
+	struct RotationsList* free_rotations_list = malloc(sizeof (struct RotationsList));
+	struct RotationNode* last_to_have_modified[n]; //vettore di puntatori all'ultimo nodo che ha modificato l'uomo
+	char* m_i = malloc(sizeof (char) * n);
+	char* bottom_matching = gale_shapley(n, women_preferences, men_preferences);
+	int marking[n]; //-1 unmarked, n marked ma non associata, altri sono la donna precedente
+	int rotation_index = 0; //per indicizzare le rotationi su already_added_predecessors
+	int already_added_predecessors[n*n]; //per ridurre il numero di archi nel grafo delle rotazioni
+
+	for (int j = 0; j < n; j++) {
+		m_i[j] = top_matching[j];
+		marking[j] = -1;
+		last_to_have_modified[j] = NULL;
+	}
+	int men_preferences_indexes[n];
+	for (int j = 0; j < n; j++) {
+		int k = 0; 
+		while (men_preferences[k] != m_i[j]) {
+			k++;
+		}
+		men_preferences_indexes[j] = k;
+	}
+
+	int old_m = 0;
+	while (1) {
+		//STEP 1
+		int m = -1;
+		//troviamo il primo uomo diverso tra m_i e bottom_matching
+		for (int j = old_m; j < n; j++) {
+			if (m_i[j] != bottom_matching[j]) {
+				m = j; 
+				old_m = j;
+				break;
+			}
+		}
+
+		if (m < 0) { //m_i == bottom_matching
+			break;
+		}
+
+		//STEP 2
+		char w = m_i[m];
+		marking[w] = n;
+		int* rotation_index_ptr = &rotation_index 
+		breakmarriage(m_i, m, n, men_preferences, men_preferences_indexes, women_preferences, marking, free_rotations_list, 
+					  last_to_have_modified, *rotation_index_ptr, already_added_predecessors);
+	}
+	return free_rotations_list->first;
+}
+
 
 void recursive_search(char* matching, int n, struct RotationsListElement* free_rotations_list, struct ResultsList* results_list){
 	struct RotationNode* successor;
@@ -125,16 +191,4 @@ void recursive_search(char* matching, int n, struct RotationsListElement* free_r
 		//ad ogni iterazione, togliamo una rotazione dalla lista
 		free_rotations_list = free_rotations_list->next;
 	}
-}
-
-int test(int* women_preferences, int n, int w, int m, int m1) {
-    for (int i = 0; i < n; i++) {
-        if (women_preferences[w][i] == m) {
-            return 1;
-        }
-        if (women_preferences[w][i] == m1) {
-            return 0;
-        }
-    }
-    return 0;
 }
