@@ -35,7 +35,7 @@ struct RotationsList { //free_rotations_list
 
 struct RotationsListElement { //free_rotations_list
 	struct RotationNode* value;
-	struct ResultsListElement* next;
+	struct RotationsListElement* next;
 };
 
 void appendResultsList(struct ResultsList* list, char* result){
