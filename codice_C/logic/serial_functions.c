@@ -67,19 +67,19 @@ int accept_proposal(int* women_preferences, int n, int w, int m, int m1) {
 
 struct RotationsList* find_all_rotations(int* men_preferences, int* women_preferences, int n, char* top_matching) {
 	struct RotationsList* free_rotations_list = malloc(sizeof (struct RotationsList));
-	struct RotationNode* last_to_have_modified[n]; //vettore di puntatori all'ultimo nodo che ha modificato l'uomo
+	struct RotationNode** last_to_have_modified = malloc(sizeof (struct RotationNode) * n); //vettore di puntatori all'ultimo nodo che ha modificato l'uomo
 	char* m_i = malloc(sizeof (char) * n);
 	char* bottom_matching = gale_shapley(n, women_preferences, men_preferences);
-	int marking[n]; //-1 unmarked, n marked ma non associata, altri sono la donna precedente
+	int* marking = malloc(sizeof (int) * n); //-1 unmarked, n marked ma non associata, altri sono la donna precedente
 	int rotation_index = 0; //per indicizzare le rotationi su already_added_predecessors
-	int already_added_predecessors[n*n]; //per ridurre il numero di archi nel grafo delle rotazioni
+	int* already_added_predecessors = malloc(sizeof (int) * (n*n)); //per ridurre il numero di archi nel grafo delle rotazioni
 
 	for (int j = 0; j < n; j++) {
 		m_i[j] = top_matching[j];
 		marking[j] = -1;
 		last_to_have_modified[j] = NULL;
 	}
-	int men_preferences_indexes[n];
+	int* men_preferences_indexes = malloc(sizeof (int) * n);
 	for (int j = 0; j < n*n; j++) {
 		already_added_predecessors[j] = false;
 	}
@@ -115,7 +115,11 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 		breakmarriage(m_i, m, n, men_preferences, men_preferences_indexes, women_preferences, marking, free_rotations_list, 
 					  last_to_have_modified, &rotation_index, already_added_predecessors);
 	}
+	free(last_to_have_modified);
 	free(m_i);
+	free(marking);
+	free(already_added_predecessors);
+	free(men_preferences_indexes);
 	return free_rotations_list->first;
 }
 
