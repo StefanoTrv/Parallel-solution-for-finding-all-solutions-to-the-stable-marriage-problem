@@ -1,9 +1,9 @@
 #include <stdlib.h>
-
+#include "..\data_structures\data_structures.h"
 
 int test(int*, int, int, int, int);
 char* gale_shapley(int, int*, int*);
-RotationsList* find_all_rotations(int*, int*, int, char*);
+struct RotationsList* find_all_rotations(int*, int*, int, char*);
 void recursive_search(char*, int, struct RotationsListElement*, struct ResultsList*);
 
 
@@ -27,13 +27,13 @@ char* gale_shapley(int n, int* men_preferences, int* women_preferences) {
         }
 
         for (int i = 0; i < n && men_free[m]; i++) {
-            int w = men_preferences[m][i];
+            int w = men_preferences[m * n + i];
             if (women_partners[w] == -1) {
                 women_partners[w] = m;
                 men_free[m] = 0;
             } else {
                 int m1 = women_partners[w];
-                if (test(women_preferences, n, w, m, m1)) {
+                if (accept_proposal(women_preferences, n, w, m, m1)) {
                     women_partners[w] = m;
                     men_free[m] = 0;
                     men_free[m1] = 1;
@@ -49,12 +49,12 @@ char* gale_shapley(int n, int* men_preferences, int* women_preferences) {
 }
 
 
-int test(int* women_preferences, int n, int w, int m, int m1) {
+int accept_proposal(int* women_preferences, int n, int w, int m, int m1) {
     for (int i = 0; i < n; i++) {
-        if (women_preferences[w][i] == m) {
+        if (women_preferences[w * n + i] == m) {
             return 1;
         }
-        if (women_preferences[w][i] == m1) {
+        if (women_preferences[w * n + i] == m1) {
             return 0;
         }
     }
@@ -62,7 +62,7 @@ int test(int* women_preferences, int n, int w, int m, int m1) {
 }
 
 
-RotationsList* find_all_rotations(int* men_preferences, int* women_preferences, int n, char* top_matching) {
+struct RotationsList* find_all_rotations(int* men_preferences, int* women_preferences, int n, char* top_matching) {
 	struct RotationsList* free_rotations_list = malloc(sizeof (struct RotationsList));
 	struct RotationNode* last_to_have_modified[n]; //vettore di puntatori all'ultimo nodo che ha modificato l'uomo
 	char* m_i = malloc(sizeof (char) * n);
@@ -77,6 +77,10 @@ RotationsList* find_all_rotations(int* men_preferences, int* women_preferences, 
 		last_to_have_modified[j] = NULL;
 	}
 	int men_preferences_indexes[n];
+	for (int j = 0; j < n*n; j++) {
+		already_added_predecessors[j] = 0;
+	}
+	//escludiamo le preferenze sicuramente non presenti in un matrimonio stabile
 	for (int j = 0; j < n; j++) {
 		int k = 0; 
 		while (men_preferences[k] != m_i[j]) {
@@ -105,26 +109,26 @@ RotationsList* find_all_rotations(int* men_preferences, int* women_preferences, 
 		//STEP 2
 		char w = m_i[m];
 		marking[w] = n;
-		int* rotation_index_ptr = &rotation_index 
 		breakmarriage(m_i, m, n, men_preferences, men_preferences_indexes, women_preferences, marking, free_rotations_list, 
-					  last_to_have_modified, *rotation_index_ptr, already_added_predecessors);
+					  last_to_have_modified, &rotation_index, already_added_predecessors);
 	}
+	free(m_i);
 	return free_rotations_list->first;
 }
 
 
 void recursive_search(char* matching, int n, struct RotationsListElement* free_rotations_list, struct ResultsList* results_list){
 	struct RotationNode* successor;
-	struct RotationList* new_list_el;
+	struct RotationsListElement* new_list_el;
 	struct RotationList* temp;
 	struct RotationsListElement* new_free_rotations_list;
 	struct SuccessorsList* successors_list;
-	struct RotationsList* rotation;
+	struct RotationList* rotation;
 	struct RotationList* first_new_rotation;
 	
 	while(free_rotations_list != NULL){
 		//applica la rotazione
-		rotation = free_rotations_list->value->value;
+		rotation = free_rotations_list->value->rotation;
 		
 		char first_woman = rotation->woman;
 		while(rotation->next != NULL){
@@ -150,7 +154,7 @@ void recursive_search(char* matching, int n, struct RotationsListElement* free_r
 			successor->missing_predecessors -= 1;
 			if (successor->missing_predecessors == 0){
 				//aggiungi questa rotazione in cima alla lista
-				new_list_el = malloc(sizeof (struct RotationList));
+				new_list_el = malloc(sizeof (struct RotationsListElement));
 				new_list_el->value = successor;
 				new_list_el->next = new_free_rotations_list;
 				new_free_rotations_list = new_list_el;
@@ -182,7 +186,7 @@ void recursive_search(char* matching, int n, struct RotationsListElement* free_r
 		}
 		
 		//ripristina rotazione
-		rotation = free_rotations_list->value->value;
+		rotation = free_rotations_list->value->rotation;
 		while(rotation != NULL){
 			matching[rotation->man] = rotation->woman;
 			rotation = rotation->next;

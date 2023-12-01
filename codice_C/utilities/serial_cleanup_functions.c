@@ -3,7 +3,7 @@
 void free_results(struct ResultsList* results){
 	struct ResultsListElement* el = results->first;
 	struct ResultsListElement* next_el;
-	while(el!=null){
+	while(el!=NULL){
 		free(el->value);
 		next_el=el->next;
 		free(el);

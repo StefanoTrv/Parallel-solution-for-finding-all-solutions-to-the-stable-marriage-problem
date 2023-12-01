@@ -1,4 +1,5 @@
 #include "serial_functions.h"
+#include "..\data_structures\data_structures.h"
 
 struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women_preferences){
 	char* top_matching = gale_shapley(n,men_preferences,women_preferences);
