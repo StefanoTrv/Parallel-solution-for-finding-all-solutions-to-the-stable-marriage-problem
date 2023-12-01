@@ -1,8 +1,11 @@
 #include <stdlib.h>
 #include "..\data_structures\data_structures.h"
 
-int test(int*, int, int, int, int);
+#define false 0
+#define true 1
+
 char* gale_shapley(int, int*, int*);
+int accept_proposal(int*, int, int, int, int);
 struct RotationsList* find_all_rotations(int*, int*, int, char*);
 void recursive_search(char*, int, struct RotationsListElement*, struct ResultsList*);
 
@@ -11,10 +14,10 @@ char* gale_shapley(int n, int* men_preferences, int* women_preferences) {
     int women_partners[n], men_free[n];
     for (int i = 0; i < n; i++) {
         women_partners[i] = -1;
-        men_free[i] = 1;
+        men_free[i] = true;
     }
 
-    while (1) {
+    while (true) {
         int m = -1;
         for (int i = 0; i < n; i++) {
             if (men_free[i]){
@@ -30,13 +33,13 @@ char* gale_shapley(int n, int* men_preferences, int* women_preferences) {
             int w = men_preferences[m * n + i];
             if (women_partners[w] == -1) {
                 women_partners[w] = m;
-                men_free[m] = 0;
+                men_free[m] = false;
             } else {
                 int m1 = women_partners[w];
                 if (accept_proposal(women_preferences, n, w, m, m1)) {
                     women_partners[w] = m;
-                    men_free[m] = 0;
-                    men_free[m1] = 1;
+                    men_free[m] = false;
+                    men_free[m1] = true;
                 }
             }
         }
@@ -52,10 +55,10 @@ char* gale_shapley(int n, int* men_preferences, int* women_preferences) {
 int accept_proposal(int* women_preferences, int n, int w, int m, int m1) {
     for (int i = 0; i < n; i++) {
         if (women_preferences[w * n + i] == m) {
-            return 1;
+            return true;
         }
         if (women_preferences[w * n + i] == m1) {
-            return 0;
+            return false;
         }
     }
     return 0;
@@ -78,7 +81,7 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 	}
 	int men_preferences_indexes[n];
 	for (int j = 0; j < n*n; j++) {
-		already_added_predecessors[j] = 0;
+		already_added_predecessors[j] = false;
 	}
 	//escludiamo le preferenze sicuramente non presenti in un matrimonio stabile
 	for (int j = 0; j < n; j++) {
@@ -90,7 +93,7 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 	}
 
 	int old_m = 0;
-	while (1) {
+	while (true) {
 		//STEP 1
 		int m = -1;
 		//troviamo il primo uomo diverso tra m_i e bottom_matching
