@@ -24,8 +24,10 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 	results_list->first->next=NULL;
 	results_list->last=results_list->first;
 	printf("e\n");
-	
-	recursive_search(top_matching, n, free_rotations_list->first, results_list);
+
+	if(free_rotations_list->first!=NULL){
+		recursive_search(top_matching, n, free_rotations_list->first, results_list);
+	}
 	printf("f\n");
 	
 	return results_list;

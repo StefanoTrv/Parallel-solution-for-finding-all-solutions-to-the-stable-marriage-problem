@@ -69,6 +69,8 @@ int accept_proposal(int* women_preferences, int n, int w, int m, int m1) {
 
 struct RotationsList* find_all_rotations(int* men_preferences, int* women_preferences, int n, char* top_matching) {
 	struct RotationsList* free_rotations_list = (struct RotationsList*) malloc(sizeof (struct RotationsList));
+	free_rotations_list->first=NULL;
+	free_rotations_list->last=NULL;
 	struct RotationNode** last_to_have_modified = (struct RotationNode**)malloc(sizeof (struct RotationNode) * n); //vettore di puntatori all'ultimo nodo che ha modificato l'uomo
 	char* m_i = (char*)malloc(sizeof (char) * n);
 	char* bottom_matching = gale_shapley(n, women_preferences, men_preferences);
