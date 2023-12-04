@@ -7,6 +7,8 @@
 char* gale_shapley(int, int*, int*);
 int accept_proposal(int*, int, int, int, int);
 struct RotationsList* find_all_rotations(int*, int*, int, char*);
+void breakmarriage(char*, int, int, int*, int*, int*, int*, struct RotationsListElement*, struct RotationNode**, int*, int*);
+void pause_breakmarriage(int*, char*, char*, char*, struct RotationsListElement*, int, int, struct RotationNode**, int*, int*);
 void recursive_search(char*, int, struct RotationsListElement*, struct ResultsList*);
 
 
@@ -121,6 +123,142 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 	free(already_added_predecessors);
 	free(men_preferences_indexes);
 	return free_rotations_list->first;
+}
+
+
+void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_preferences_indexes, int* women_preferences, int* marking,
+				   struct RotationsListElement* free_rotations_list, struct RotationNode** last_to_have_modified, int* rotation_index, 
+				   int* already_added_predecessors) {
+	int i = 0;
+	while (men_preferences[m * n + i] != M[m]) {
+		i++;
+	}
+	men_preferences_indexes[m] = i + 1;
+	int former_wife = M[m]; //il w dell'articolo, donna con cui l'uomo è accoppiato e si deve separare
+	char* reversed_M = malloc(sizeof (char) * n);
+	char* old_reversed_M = malloc(sizeof (char) * n);
+	for (i = 0; i < n; i++) {
+		reversed_M[M[i]] = i;
+		old_reversed_M[M[i]] = i;
+	}
+	int previous_woman = n;
+
+	while(true) {
+		int breakmarriage_fail = true;
+		//itero sulle preferenze di m
+		//m diventa m' dell'articolo all'interno del ciclo
+		for (i = men_preferences_indexes[m]; i < n; i++) {
+			int w = men_preferences[m * n + i]; //il w dell'articolo
+			//prendo m1 (attuale compagno di w) e lo confronto con m
+			int m1 = reversed_M[w];
+			//se w preferisce m a m1, sciolgo (w, m1) e creo (w, m)
+			if (marking[w] < 0 && accept_proposal(women_preferences, n, w, m, m1)) { //step 2a
+				int k = men_preferences_indexes[m]; //aggiorniamo indice per efficienza
+				while (men_preferences[k] != w) {
+					k++;
+				}
+				men_preferences_indexes[m] = k;
+				reversed_M[w] = m;
+				marking[w] = previous_woman;
+				previous_woman = w;
+				m = m1; //nuovo uomo non accoppiato
+				break;
+			} else if (accept_proposal(women_preferences, n, w, m, old_reversed_M[w])) { //step 2b
+				int old_marking = marking[w];
+				pause_breakmarriage(marking, M, reversed_M, old_reversed_M, free_rotations_list, w, previous_woman, 
+									last_to_have_modified, rotation_index, already_added_predecessors);
+				if (former_wife == w) { //3c: w = w'
+					reversed_M[w] = m;
+					return; //al passo 1
+				} else {
+					if (accept_proposal(women_preferences, n, w, m, m1)) {
+						m = m1;
+						breakmarriage_fail = false;
+						break;
+					} else {
+						marking[w] = old_marking;
+						continue;
+					}
+					
+				}
+			}
+		}
+		if (breakmarriage_fail) { //non abbiamo trovato un accoppiamento stabile per m
+			free(reversed_M);
+			free(old_reversed_M);
+			return;
+		}
+	}
+}
+
+
+void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reversed_M, struct RotationsListElement* free_rotations_list, int w, 
+					     int previous_woman, struct RotationNode** last_to_have_modified, int* rotation_index, int* already_added_predecessors) {
+	int no_predecessors = true;
+	struct RotationsListElement* prev_list_el = NULL;
+	int w2 = w;
+	int go_on = true;
+	struct RotationNode* rotation_node = malloc(sizeof (struct RotationNode));
+	rotation_node->missing_predecessors = 0;
+	rotation_node->index = *rotation_index;
+	*rotation_index += 1;
+	struct RotationsList* predecessors_list = malloc(sizeof (struct RotationsList)); //i predecessori del nodo che stiamo creando, per poter resettare already_added_predecessors
+	struct RotationsListElement* list_el = NULL;
+
+	while(w2 != w && go_on) {
+		go_on = w2 == w;
+		//costruire lista della rotazione dalla coda alla testa
+		list_el = malloc(sizeof (struct RotationsListElement));
+		list_el->value->rotation->man = old_reversed_M[w2];
+		list_el->value->rotation->woman = w2;
+		list_el->next = prev_list_el;
+		prev_list_el = list_el;
+		//aggiorniamo predecessori e last_to_have_modified
+		struct SuccessorsList* new_successor = malloc(sizeof (struct SuccessorsList));
+		new_successor->value = rotation_node;
+		if (last_to_have_modified[old_reversed_M[w2]] != NULL && !already_added_predecessors[last_to_have_modified[old_reversed_M[w2]]->index]) { 
+			//aggiungiamo la rotazione solo una volta ad ogni predecessore
+			new_successor->next = last_to_have_modified[old_reversed_M[w2]]->successors;
+			last_to_have_modified[old_reversed_M[w2]]->successors = new_successor;
+			no_predecessors = false;
+			rotation_node->missing_predecessors += 1;
+			already_added_predecessors[last_to_have_modified[old_reversed_M[w2]]->index] = true;
+			appendRotationsList(predecessors_list, last_to_have_modified[old_reversed_M[w2]]);
+		} else {
+			new_successor->next = NULL;
+		}
+		last_to_have_modified[old_reversed_M[w2]] = rotation_node;
+		//aggiorniamo old_reversed_M (i = i+1)
+		old_reversed_M[w2] = reversed_M[w2];
+		//aggiorna M
+		M[old_reversed_M[w2]] = w2;
+		//resettare marking
+		marking[w2] = -1;
+		//update previous_woman
+		w2 = previous_woman;
+		previous_woman = marking[w2];
+	}
+
+	rotation_node->rotation = prev_list_el;
+
+	if (no_predecessors) {
+		struct RotationsListElement* new_list_el = malloc(sizeof (struct RotationsListElement));
+		new_list_el->value = rotation_node;
+		appendRotationsList(free_rotations_list, new_list_el);
+	}
+
+	//ripristiniamo already_added_predecessors
+	list_el = predecessors_list->first;
+	struct RotationsListElement* temp;
+	while (list_el != NULL) {
+		already_added_predecessors[list_el->value->index] = false;
+		temp = list_el;
+		list_el = list_el->next;
+		free(temp);
+	}
+
+	free(predecessors_list);
+	return;
 }
 
 
