@@ -1,5 +1,5 @@
-#ifndef DATA_STRUCTURES
-#define DATA_STRUCTURES
+#ifndef INPUT_OUTPUT
+#define INPUT_OUTPUT
 
 int read_dimension(FILE*);
 void fill_matrices(FILE*, int, int**, int**);
