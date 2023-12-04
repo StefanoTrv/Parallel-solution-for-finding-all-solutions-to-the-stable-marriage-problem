@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include <stdint.h>
-#include "input_output.h"
-//#include "logic\serial_functions.h"
+#include "logic\serial_functions.h"
 #include "data_structures\data_structures.h"
 #include "utilities\utilities.h"
 
@@ -50,23 +49,28 @@ int main(int argc, char* argv[]) {
         men_preferences = make_random_preferences(n);
         women_preferences = make_random_preferences(n);
 
+        printf("1");
+
         start_time = currentTimeMillis();
-        //results = all_stable_matchings(n, men_preferences, women_prefereces);
+        results = all_stable_matchings(n, men_preferences, women_preferences);
+        printf("1.5");
         end_time = currentTimeMillis();
 
+        printf("2");
+
         number_of_results = 0;
-        /*list_el = results->first;
+        list_el = results->first;
         while(list_el!=NULL){
             number_of_results++;
             list_el=list_el->next;
-        }*/
+        }
 
         time = end_time-start_time;
         fprintf(file, "%i\t%i\t%i\n", time, number_of_results, n);
 
         free(men_preferences);
         free(women_preferences);
-        //free_results(results);
+        free_results(results);
         printf("\nCompleted test %i of %i",i+1,iterations);
     }
 

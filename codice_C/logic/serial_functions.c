@@ -7,8 +7,8 @@
 char* gale_shapley(int, int*, int*);
 int accept_proposal(int*, int, int, int, int);
 struct RotationsList* find_all_rotations(int*, int*, int, char*);
-void breakmarriage(char*, int, int, int*, int*, int*, int*, struct RotationsListElement*, struct RotationNode**, int*, int*);
-void pause_breakmarriage(int*, char*, char*, char*, struct RotationsListElement*, int, int, struct RotationNode**, int*, int*);
+void breakmarriage(char*, int, int, int*, int*, int*, int*, struct RotationsList*, struct RotationNode**, int*, int*);
+void pause_breakmarriage(int*, char*, char*, char*, struct RotationsList*, int, int, struct RotationNode**, int*, int*);
 void recursive_search(char*, int, struct RotationsListElement*, struct ResultsList*);
 
 
@@ -46,7 +46,7 @@ char* gale_shapley(int n, int* men_preferences, int* women_preferences) {
             }
         }
     }
-    char* matching = malloc(n * sizeof(char));
+    char* matching = (char*)malloc(n * sizeof(char));
     for (char i = 0; i < n; i++) {
         matching[women_partners[i]] = i;
     }
@@ -68,20 +68,20 @@ int accept_proposal(int* women_preferences, int n, int w, int m, int m1) {
 
 
 struct RotationsList* find_all_rotations(int* men_preferences, int* women_preferences, int n, char* top_matching) {
-	struct RotationsList* free_rotations_list = malloc(sizeof (struct RotationsList));
-	struct RotationNode** last_to_have_modified = malloc(sizeof (struct RotationNode) * n); //vettore di puntatori all'ultimo nodo che ha modificato l'uomo
-	char* m_i = malloc(sizeof (char) * n);
+	struct RotationsList* free_rotations_list = (struct RotationsList*) malloc(sizeof (struct RotationsList));
+	struct RotationNode** last_to_have_modified = (struct RotationNode**)malloc(sizeof (struct RotationNode) * n); //vettore di puntatori all'ultimo nodo che ha modificato l'uomo
+	char* m_i = (char*)malloc(sizeof (char) * n);
 	char* bottom_matching = gale_shapley(n, women_preferences, men_preferences);
-	int* marking = malloc(sizeof (int) * n); //-1 unmarked, n marked ma non associata, altri sono la donna precedente
+	int* marking = (int*)malloc(sizeof (int) * n); //-1 unmarked, n marked ma non associata, altri sono la donna precedente
 	int rotation_index = 0; //per indicizzare le rotationi su already_added_predecessors
-	int* already_added_predecessors = malloc(sizeof (int) * (n*n)); //per ridurre il numero di archi nel grafo delle rotazioni
+	int* already_added_predecessors = (int*)malloc(sizeof (int) * (n*n)); //per ridurre il numero di archi nel grafo delle rotazioni
 
 	for (int j = 0; j < n; j++) {
 		m_i[j] = top_matching[j];
 		marking[j] = -1;
 		last_to_have_modified[j] = NULL;
 	}
-	int* men_preferences_indexes = malloc(sizeof (int) * n);
+	int* men_preferences_indexes = (int*)malloc(sizeof (int) * n);
 	for (int j = 0; j < n*n; j++) {
 		already_added_predecessors[j] = false;
 	}
@@ -122,12 +122,12 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 	free(marking);
 	free(already_added_predecessors);
 	free(men_preferences_indexes);
-	return free_rotations_list->first;
+	return free_rotations_list;
 }
 
 
 void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_preferences_indexes, int* women_preferences, int* marking,
-				   struct RotationsListElement* free_rotations_list, struct RotationNode** last_to_have_modified, int* rotation_index, 
+				   struct RotationsList* free_rotations_list, struct RotationNode** last_to_have_modified, int* rotation_index, 
 				   int* already_added_predecessors) {
 	int i = 0;
 	while (men_preferences[m * n + i] != M[m]) {
@@ -135,8 +135,8 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 	}
 	men_preferences_indexes[m] = i + 1;
 	int former_wife = M[m]; //il w dell'articolo, donna con cui l'uomo è accoppiato e si deve separare
-	char* reversed_M = malloc(sizeof (char) * n);
-	char* old_reversed_M = malloc(sizeof (char) * n);
+	char* reversed_M = (char*)malloc(sizeof (char) * n);
+	char* old_reversed_M = (char*)malloc(sizeof (char) * n);
 	for (i = 0; i < n; i++) {
 		reversed_M[M[i]] = i;
 		old_reversed_M[M[i]] = i;
@@ -192,29 +192,29 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 }
 
 
-void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reversed_M, struct RotationsListElement* free_rotations_list, int w, 
+void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reversed_M, struct RotationsList* free_rotations_list, int w, 
 					     int previous_woman, struct RotationNode** last_to_have_modified, int* rotation_index, int* already_added_predecessors) {
 	int no_predecessors = true;
-	struct RotationsListElement* prev_list_el = NULL;
+	struct RotationList* prev_list_el = NULL;
 	int w2 = w;
 	int go_on = true;
-	struct RotationNode* rotation_node = malloc(sizeof (struct RotationNode));
+	struct RotationNode* rotation_node = (struct RotationNode*)malloc(sizeof (struct RotationNode));
 	rotation_node->missing_predecessors = 0;
 	rotation_node->index = *rotation_index;
 	*rotation_index += 1;
-	struct RotationsList* predecessors_list = malloc(sizeof (struct RotationsList)); //i predecessori del nodo che stiamo creando, per poter resettare already_added_predecessors
-	struct RotationsListElement* list_el = NULL;
+	struct RotationsList* predecessors_list = (struct RotationsList*)malloc(sizeof (struct RotationsList)); //i predecessori del nodo che stiamo creando, per poter resettare already_added_predecessors
+	struct RotationList* list_el = NULL;
 
 	while(w2 != w && go_on) {
 		go_on = w2 == w;
 		//costruire lista della rotazione dalla coda alla testa
-		list_el = malloc(sizeof (struct RotationsListElement));
-		list_el->value->rotation->man = old_reversed_M[w2];
-		list_el->value->rotation->woman = w2;
+		list_el = (struct RotationList*)malloc(sizeof (struct RotationList));
+		list_el->man = old_reversed_M[w2];
+		list_el->woman = w2;
 		list_el->next = prev_list_el;
 		prev_list_el = list_el;
 		//aggiorniamo predecessori e last_to_have_modified
-		struct SuccessorsList* new_successor = malloc(sizeof (struct SuccessorsList));
+		struct SuccessorsList* new_successor = (struct SuccessorsList*)malloc(sizeof (struct SuccessorsList));
 		new_successor->value = rotation_node;
 		if (last_to_have_modified[old_reversed_M[w2]] != NULL && !already_added_predecessors[last_to_have_modified[old_reversed_M[w2]]->index]) { 
 			//aggiungiamo la rotazione solo una volta ad ogni predecessore
@@ -242,18 +242,16 @@ void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reve
 	rotation_node->rotation = prev_list_el;
 
 	if (no_predecessors) {
-		struct RotationsListElement* new_list_el = malloc(sizeof (struct RotationsListElement));
-		new_list_el->value = rotation_node;
-		appendRotationsList(free_rotations_list, new_list_el);
+		appendRotationsList(free_rotations_list, rotation_node);
 	}
 
-	//ripristiniamo already_added_predecessors
-	list_el = predecessors_list->first;
-	struct RotationsListElement* temp;
-	while (list_el != NULL) {
-		already_added_predecessors[list_el->value->index] = false;
-		temp = list_el;
-		list_el = list_el->next;
+	//ripristiniamo already_added_predecessors, deallocando lo spazio
+	struct RotationsListElement* rot_list_el = predecessors_list->first;
+	struct RotationsListElement * temp;
+	while (rot_list_el != NULL) {
+		already_added_predecessors[rot_list_el->value->index] = false;
+		temp = rot_list_el;
+		rot_list_el = rot_list_el->next;
 		free(temp);
 	}
 
@@ -265,11 +263,11 @@ void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reve
 void recursive_search(char* matching, int n, struct RotationsListElement* free_rotations_list, struct ResultsList* results_list){
 	struct RotationNode* successor;
 	struct RotationsListElement* new_list_el;
-	struct RotationList* temp;
+	struct RotationsListElement* temp;
 	struct RotationsListElement* new_free_rotations_list;
 	struct SuccessorsList* successors_list;
 	struct RotationList* rotation;
-	struct RotationList* first_new_rotation;
+	struct RotationsListElement* first_new_rotation;
 	
 	while(free_rotations_list != NULL){
 		//applica la rotazione
@@ -283,7 +281,7 @@ void recursive_search(char* matching, int n, struct RotationsListElement* free_r
 		matching[rotation->man] = first_woman;
 		
 		//aggiungo il matching ai risultati
-		char* new_matching = malloc(sizeof (char) * n);
+		char* new_matching = (char*)malloc(sizeof (char) * n);
 		for(int i=0;i<n;i++){
 			new_matching[i]=matching[i];
 		}
@@ -299,7 +297,7 @@ void recursive_search(char* matching, int n, struct RotationsListElement* free_r
 			successor->missing_predecessors -= 1;
 			if (successor->missing_predecessors == 0){
 				//aggiungi questa rotazione in cima alla lista
-				new_list_el = malloc(sizeof (struct RotationsListElement));
+				new_list_el = (struct RotationsListElement*)malloc(sizeof (struct RotationsListElement));
 				new_list_el->value = successor;
 				new_list_el->next = new_free_rotations_list;
 				new_free_rotations_list = new_list_el;
