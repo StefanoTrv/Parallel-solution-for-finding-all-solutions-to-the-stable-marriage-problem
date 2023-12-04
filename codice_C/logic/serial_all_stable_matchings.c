@@ -1,14 +1,18 @@
 #include "..\data_structures\data_structures.h"
 
 struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women_preferences){
+	printf("a\n");
 	char* top_matching = gale_shapley(n,men_preferences,women_preferences);
+	printf("b\n");
 	
 	char* top_matching_copy = (char*) malloc(sizeof (char) * n);
 	for(int i=0;i<n;i++){
 		top_matching_copy[i]=top_matching[i];
 	}
+	printf("c\n");
 	//crea il grafo delle rotazioni
 	struct RotationsList* free_rotations_list = find_all_rotations(men_preferences,women_preferences, n, top_matching_copy);
+	printf("d\n");
 	
 	//aggiungo top matching ai risultati
 	struct ResultsList* results_list = (struct ResultsList*) malloc(sizeof (struct ResultsList));
@@ -19,8 +23,10 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 	results_list->first->value=top_matching_copy;
 	results_list->first->next=NULL;
 	results_list->last=results_list->first;
+	printf("e\n");
 	
 	recursive_search(top_matching, n, free_rotations_list->first, results_list);
+	printf("f\n");
 	
 	return results_list;
 }

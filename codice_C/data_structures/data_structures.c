@@ -42,14 +42,24 @@ void appendResultsList(struct ResultsList* list, char* result){
 	struct ResultsListElement *new = malloc(sizeof (struct ResultsListElement));
 	new->value = result;
 	new->next = NULL;
-	list->last->next = new;
-	list->last = new;
+	if (list->first==NULL){
+		list->first = new;
+		list->last=new;
+	}else{
+		list->last->next = new;
+		list->last = new;
+	}
 }
 
 void appendRotationsList(struct RotationsList* list, struct RotationNode* rotation_node){
 	struct RotationsListElement *new = malloc(sizeof (struct RotationsListElement));
 	new->value = rotation_node;
 	new->next = NULL;
-	list->last->next = new;
-	list->last = new;
+	if (list->first==NULL){
+		list->first = new;
+		list->last=new;
+	}else{
+		list->last->next = new;
+		list->last = new;
+	}
 }
