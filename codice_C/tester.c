@@ -19,7 +19,7 @@ int64_t currentTimeMillis() {
 
 
 int main(int argc, char* argv[]) {
-    if (argc != 3 && argc!=4) {
+    if (argc != 4 && argc!=5) {
         printf("Usage: .\\tester.exe instances_dimension instances_number output_file <seed>");
         return 1;
     }
