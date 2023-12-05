@@ -1,4 +1,5 @@
 #include "..\data_structures\data_structures.h"
+#include <stdlib.h>
 
 struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women_preferences){
 	printf("a\n");
@@ -30,5 +31,6 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 	}
 	printf("f\n");
 	
+	free(top_matching);
 	return results_list;
 }

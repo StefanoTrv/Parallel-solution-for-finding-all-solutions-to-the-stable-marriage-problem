@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/Stefano/Desktop/Parallel-solution-for-finding-all-solutions-to-the-stable-marriage-problem/codice_C",
-      "program": "c:/Users/Stefano/Desktop/Parallel-solution-for-finding-all-solutions-to-the-stable-marriage-problem/codice_C/build/Debug/outDebug",
+      "cwd": "c:/Users/Stefano/Desktop/Parallel-solution-for-finding-all-solutions-to-the-stable-marriage-problem/codice_C/logic",
+      "program": "c:/Users/Stefano/Desktop/Parallel-solution-for-finding-all-solutions-to-the-stable-marriage-problem/codice_C/logic/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

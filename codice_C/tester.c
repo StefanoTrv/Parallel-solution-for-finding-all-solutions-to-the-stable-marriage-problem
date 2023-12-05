@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
         men_preferences = make_random_preferences(n);
         women_preferences = make_random_preferences(n);
 
-        printf("1\n");
+        printf("\n1\n");
 
         start_time = currentTimeMillis();
         results = all_stable_matchings(n, men_preferences, women_preferences);
