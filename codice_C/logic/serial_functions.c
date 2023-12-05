@@ -55,39 +55,40 @@ char* gale_shapley(int n, int* men_preferences, int* women_preferences) {
 
 
 int accept_proposal(int* women_preferences, int n, int w, int m, int m1) {
-	printf("accept_proposal: %i %i\n",w,m);
+	//printf("accept_proposal: %i %i\n",w,m);
     for (int i = 0; i < n; i++) {
         if (women_preferences[w * n + i] == m) {
             return true;
         }
         if (women_preferences[w * n + i] == m1) {
-			printf("FALSE!!!!!");
+			//printf("FALSE!!!!!");
             return false;
         }
     }
-	printf("ERROR!");
+	//printf("ERROR!");
+	//printf("\n");
     return 0;
 }
 
 
 struct RotationsList* find_all_rotations(int* men_preferences, int* women_preferences, int n, char* top_matching) {
-	printf("men_preferences\n");
-	for (int i=0;i<5;i++){
-		for (int j=0;j<5;j++){
-			printf("%i, ",men_preferences[i*5+j]);
+	printf("men_preferences:\n");
+	for (int i=0;i<n;i++){
+		for (int j=0;j<n;j++){
+			printf("%i, ",men_preferences[i*n+j]);
 		}
 		printf("\n");
 	}
-	printf("women_preferences\n");
-	for (int i=0;i<5;i++){
-		for (int j=0;j<5;j++){
-			printf("%i, ",women_preferences[i*5+j]);
+	printf("women_preferences:\n");
+	for (int i=0;i<n;i++){
+		for (int j=0;j<n;j++){
+			printf("%i, ",women_preferences[i*n+j]);
 		}
 		printf("\n");
 	}
 	
-	printf("Top matching\n");
-	for (int i=0;i<5;i++){
+	printf("Top matching:\n");
+	for (int i=0;i<n;i++){
 		printf("%i, ",top_matching[i]);
 	}
 	printf("\n");
@@ -95,22 +96,28 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 	free_rotations_list->first=NULL;
 	free_rotations_list->last=NULL;
 	struct RotationNode** last_to_have_modified = (struct RotationNode**)malloc(sizeof (struct RotationNode) * n); //vettore di puntatori all'ultimo nodo che ha modificato l'uomo
-	char* m_i = (char*)malloc(sizeof (char) * n);
-	char* inverted_bottom_matching = gale_shapley(n, women_preferences, men_preferences);//DA INVERTIRE!!!
+	char* m_i = (char*) malloc(sizeof (char) * n);
+	char* inverted_bottom_matching = gale_shapley(n, women_preferences, men_preferences);
 	char* bottom_matching = (char*)malloc(sizeof (char) * n);
 	for(int i=0;i<n;i++){
 		bottom_matching[inverted_bottom_matching[i]]=i;
 	}
-	int* marking = (int*)malloc(sizeof (int) * n); //-1 unmarked, n marked ma non associata, altri sono la donna precedente
+	printf("Bottom matching:\n");
+	for(int i=0;i<n;i++){
+		printf("%i, ", bottom_matching[i]);
+	}
+	printf("\n");
+	
+	int* marking = (int*) malloc(sizeof (int) * n); //-1 unmarked, n marked ma non associata, altri sono la donna precedente
 	int rotation_index = 0; //per indicizzare le rotationi su already_added_predecessors
-	int* already_added_predecessors = (int*)malloc(sizeof (int) * (n*n)); //per ridurre il numero di archi nel grafo delle rotazioni
+	int* already_added_predecessors = (int*) malloc(sizeof (int) * (n*n)); //per ridurre il numero di archi nel grafo delle rotazioni
 	printf("A\n");
 
 	for (int j = 0; j < n; j++) {
 		m_i[j] = top_matching[j];
 		last_to_have_modified[j] = NULL;
 	}
-	int* men_preferences_indexes = (int*)malloc(sizeof (int) * n);
+	int* men_preferences_indexes = (int*) malloc(sizeof (int) * n);
 	for (int j = 0; j < n*n; j++) {
 		already_added_predecessors[j] = false;
 	}
@@ -119,7 +126,7 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 	printf("men_preferences_indexes[j]\n");
 	for (int j = 0; j < n; j++) {
 		int k = 0; 
-		while (men_preferences[j*5+k] != m_i[j]) {
+		while (men_preferences[j * n + k] != m_i[j]) {
 			k++;
 		}
 		men_preferences_indexes[j] = k+1;//scartiamo quelle attuali, teniamo solo quelle diverse
@@ -158,6 +165,7 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 		printf("\t\t%i\n",w);
 		breakmarriage(m_i, m, n, men_preferences, men_preferences_indexes, women_preferences, marking, free_rotations_list, 
 					  last_to_have_modified, &rotation_index, already_added_predecessors, w);
+		printf("\n");
 		printf("C4\n");
 	}
 	printf("D\n");
@@ -177,12 +185,12 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 				   struct RotationsList* free_rotations_list, struct RotationNode** last_to_have_modified, int* rotation_index, 
 				   int* already_added_predecessors, int first_woman) {
 	printf("breakmarriage:\n");
-	for (int i=0;i<5;i++){
+	for (int i=0;i<n;i++){
 		printf("%i, ",marking[i]);
 	}
 	printf("\n");
 	printf("\n");
-	for (int i=0;i<5;i++){
+	for (int i=0;i<n;i++){
 		printf("%i, ",M[i]);
 	}
 	printf("\n");
