@@ -360,6 +360,7 @@ void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reve
 		list_el = (struct RotationList*)malloc(sizeof (struct RotationList));
 		list_el->man = old_reversed_M[w2];
 		list_el->woman = w2;
+		printf("\ncoppia rotazione: uomo->%i donna->%i",list_el->man,list_el->woman);
 		printf("\n..a");
 		list_el->next = prev_list_el;
 		printf("\n..b");
@@ -412,6 +413,10 @@ void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reve
 		printf("\nold_reversed_M\n");
 		for (int i=0;i<5;i++){
 			printf("%i, ",old_reversed_M[i]);
+		}
+		printf("\nmarking\n");
+		for (int i=0;i<5;i++){
+			printf("%i, ",marking[i]);
 		}
 	}
 
