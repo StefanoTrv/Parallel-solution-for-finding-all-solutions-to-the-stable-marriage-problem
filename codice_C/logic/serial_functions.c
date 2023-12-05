@@ -332,11 +332,11 @@ void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reve
 		prev_list_el = list_el;
 		printf("\n..c");
 		//aggiorniamo predecessori e last_to_have_modified
-		new_successor = (struct SuccessorsList*)malloc(sizeof (struct SuccessorsList));
-		printf("\n..d");
-		new_successor->value = rotation_node;
-		printf("\n...");
 		if (last_to_have_modified[old_reversed_M[w2]] != NULL && !already_added_predecessors[last_to_have_modified[old_reversed_M[w2]]->index]) {
+			new_successor = (struct SuccessorsList*)malloc(sizeof (struct SuccessorsList));
+			printf("\n..d");
+			new_successor->value = rotation_node;
+			printf("\n...");
 			printf("\n....");
 			//aggiungiamo la rotazione solo una volta ad ogni predecessore
 			new_successor->next = last_to_have_modified[old_reversed_M[w2]]->successors;
@@ -348,10 +348,6 @@ void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reve
 			printf("\n....b");
 			appendRotationsList(predecessors_list, last_to_have_modified[old_reversed_M[w2]]);
 			printf("\nX");
-		} else {
-			printf("\nX.");
-			new_successor->next = NULL;
-			printf("\nX..");
 		}
 		printf("\nX...");
 		last_to_have_modified[old_reversed_M[w2]] = rotation_node;
@@ -456,11 +452,14 @@ void recursive_search(char* matching, int n, struct RotationsListElement* free_r
 		new_free_rotations_list = free_rotations_list->next;
 		successors_list = free_rotations_list->value->successors;
 		while(successors_list != NULL){
+			printf("\t%p, %i, %p==%p",successors_list,*(successors_list->value),successors_list->next,NULL);
 			successor = successors_list->value;
 			successor->missing_predecessors -= 1;
 			if (successor->missing_predecessors == 0){
 				//aggiungi questa rotazione in cima alla lista
+				printf("Prima del malloc");
 				new_list_el = (struct RotationsListElement*)malloc(sizeof (struct RotationsListElement));
+				printf("Dopo del malloc");
 				new_list_el->value = successor;
 				new_list_el->next = new_free_rotations_list;
 				new_free_rotations_list = new_list_el;
@@ -468,11 +467,13 @@ void recursive_search(char* matching, int n, struct RotationsListElement* free_r
 					first_new_rotation = new_list_el;
 				}
 			}
+			successors_list = successors_list->next;
 		}
 		printf("\n!!!!");
 		
 		//chiamata ricorsiva
 		recursive_search(matching, n, new_free_rotations_list, results_list);
+		printf("\nFine chiamata ricorsiva");
 		
 		//ripristino le rotazioni
 		//ripristino i missing_predecessors dei successori
