@@ -295,6 +295,7 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 					if (!accept_proposal(women_preferences, n, w, m, m1)) {
 						printf("XII\n");
 						marking[w] = old_marking;
+						previous_woman = w;
 						continue;
 					} else {
 						printf("XI\n");
@@ -346,7 +347,7 @@ void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reve
 	struct RotationList* list_el = NULL;
 	struct SuccessorsList* new_successor;
 	printf("\n.");
-	printf("w = %i\n",w);
+	printf("\nw = %i\n",w);
 	while(w2 != w || go_on) {
 		printf("\nWHILE di pause: ----------------------\n");
 		for (int i=0;i<8;i++){
