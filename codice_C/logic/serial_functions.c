@@ -115,6 +115,7 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 
 	for (int j = 0; j < n; j++) {
 		m_i[j] = top_matching[j];
+		marking[j] = -1;
 		last_to_have_modified[j] = NULL;
 	}
 	int* men_preferences_indexes = (int*) malloc(sizeof (int) * n);
@@ -156,9 +157,6 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 		
 		printf("while di find_all_rotations::\tm = %i, w = %i",m,m_i[m]);
 		
-		for (int j = 0; j < n; j++) {//unmark any marked woman
-			marking[j] = -1;
-		}
 		//STEP 2
 		char w = m_i[m];
 		marking[w] = n;
