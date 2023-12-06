@@ -57,7 +57,6 @@ char* gale_shapley(int n, int* men_preferences, int* women_preferences) {
 int accept_proposal(int* women_preferences, int n, int w, int m, int m1) {
 	printf("accept_proposal: w=%i m=%i m1=%i\n",w,m,m1);
     for (int i = 0; i < n; i++) {
-		printf("  %i  ",women_preferences[w * n + i]);
         if (women_preferences[w * n + i] == m) {
             return true;
         }
@@ -349,7 +348,7 @@ void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reve
 	printf("\n.");
 	printf("w = %i\n",w);
 	while(w2 != w || go_on) {
-		printf("\nWHILE: ----------------------\n");
+		printf("\nWHILE di pause: ----------------------\n");
 		for (int i=0;i<8;i++){
 			printf("%i, ",marking[i]);
 		}
@@ -394,15 +393,16 @@ void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reve
 		M[old_reversed_M[w2]] = w2;
 		printf("\n\t3");
 		//resettare marking
+		printf("\n\t\tmarking[w2]: %i, w2: %i, ora diventa -1",marking[w2],w2);
 		marking[w2] = -1;
 		printf("\n\t4");
 		//update previous_woman
-		printf("\n\t\tw2: %i _ previous_woman:%i",w2,w);
+		printf("\n\t\tw2: %i _ previous_woman:%i",w2,previous_woman);
 		w2 = previous_woman;
 		previous_woman = marking[w2];
 		printf("\n\t5");
 		printf("\nX....");
-		printf("\nfine del while:\nM[i] = ");
+		printf("\nfine del while di pause:\nM[i] = ");
 		for (int i=0;i<8;i++){
 			printf("%i, ",M[i]);
 		}
