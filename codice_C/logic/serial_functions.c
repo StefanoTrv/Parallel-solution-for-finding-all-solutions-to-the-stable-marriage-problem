@@ -518,6 +518,7 @@ void recursive_search(char* matching, int n, struct RotationsListElement* free_r
 		while(successors_list != NULL){
 			successor = successors_list->value;
 			successor->missing_predecessors += 1;
+			successors_list=successors_list->next;
 		}
 		printf("\n!!!!!");
 		
