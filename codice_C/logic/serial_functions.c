@@ -103,7 +103,7 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 	for(int i=0;i<n;i++){
 		bottom_matching[inverted_bottom_matching[i]]=i;
 	}
-	printf("Bottom matching:\n");
+	printf("\nBottom matching:\n");
 	for(int i=0;i<n;i++){
 		printf("%i, ", bottom_matching[i]);
 	}
@@ -190,7 +190,7 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 		printf("%i, ",marking[i]);
 	}
 	printf("\n");
-	printf("\n");
+	printf("\nM[i] = ");
 	for (int i=0;i<n;i++){
 		printf("%i, ",M[i]);
 	}
@@ -215,11 +215,11 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 		printf("II\n");
 		printf("\nwhile di breakmarriage: +++++++++++++++++++++++++\n");
 		printf("marking\n");
-		for (int i=0;i<5;i++){
+		for (int i=0;i<n;i++){
 			printf("%i, ",marking[i]);
 		}
 		printf("\nreversed_M\n");
-		for (int i=0;i<5;i++){
+		for (int i=0;i<n;i++){
 			printf("%i, ",reversed_M[i]);
 		}
 		printf("\n+++++++++++++++++++++++++\n");
@@ -230,11 +230,11 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 		for (i = men_preferences_indexes[m]; i < n; i++) {
 			printf("\nFOR di breakmarriage: +++++++++++++++++++++++++\n");
 			printf("marking\n");
-			for (int i=0;i<5;i++){
+			for (int i=0;i<n;i++){
 				printf("%i, ",marking[i]);
 			}
 			printf("\nreversed_M\n");
-			for (int i=0;i<5;i++){
+			for (int i=0;i<n;i++){
 				printf("%i, ",reversed_M[i]);
 			}
 			printf("\n+++++++++++++++++++++++++\n");
@@ -324,11 +324,11 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reversed_M, struct RotationsList* free_rotations_list, int w, int m, 
 					     int previous_woman, struct RotationNode** last_to_have_modified, int* rotation_index, int* already_added_predecessors) {
 	printf("pause_breakmarriage:\n");
-	for (int i=0;i<5;i++){
+	for (int i=0;i<8;i++){
 		printf("%i, ",marking[i]);
 	}
 	printf("\n");
-	for (int i=0;i<5;i++){
+	for (int i=0;i<8;i++){
 		printf("%i, ",reversed_M[i]);
 	}
 	printf("\n");
@@ -350,7 +350,7 @@ void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reve
 	printf("w = %i\n",w);
 	while(w2 != w || go_on) {
 		printf("\nWHILE: ----------------------\n");
-		for (int i=0;i<5;i++){
+		for (int i=0;i<8;i++){
 			printf("%i, ",marking[i]);
 		}
 		printf("\n");
@@ -402,20 +402,20 @@ void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reve
 		previous_woman = marking[w2];
 		printf("\n\t5");
 		printf("\nX....");
-		printf("\nfine del while:\nM\n");
-		for (int i=0;i<5;i++){
+		printf("\nfine del while:\nM[i] = ");
+		for (int i=0;i<8;i++){
 			printf("%i, ",M[i]);
 		}
 		printf("\nreversed_M\n");
-		for (int i=0;i<5;i++){
+		for (int i=0;i<8;i++){
 			printf("%i, ",reversed_M[i]);
 		}
 		printf("\nold_reversed_M\n");
-		for (int i=0;i<5;i++){
+		for (int i=0;i<8;i++){
 			printf("%i, ",old_reversed_M[i]);
 		}
 		printf("\nmarking\n");
-		for (int i=0;i<5;i++){
+		for (int i=0;i<8;i++){
 			printf("%i, ",marking[i]);
 		}
 	}
@@ -491,14 +491,11 @@ void recursive_search(char* matching, int n, struct RotationsListElement* free_r
 		new_free_rotations_list = free_rotations_list->next;
 		successors_list = free_rotations_list->value->successors;
 		while(successors_list != NULL){
-			printf("\t%p, %i, %p==%p",successors_list,*(successors_list->value),successors_list->next,NULL);
 			successor = successors_list->value;
 			successor->missing_predecessors -= 1;
 			if (successor->missing_predecessors == 0){
 				//aggiungi questa rotazione in cima alla lista
-				printf("Prima del malloc");
 				new_list_el = (struct RotationsListElement*)malloc(sizeof (struct RotationsListElement));
-				printf("Dopo del malloc");
 				new_list_el->value = successor;
 				new_list_el->next = new_free_rotations_list;
 				new_free_rotations_list = new_list_el;
