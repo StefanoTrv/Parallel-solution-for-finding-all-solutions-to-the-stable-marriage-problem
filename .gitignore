@@ -50,6 +50,9 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
-.vscode/c_cpp_properties.json
-.vscode/settings.json
-.vscode/launch.json
+
+#File di vscode
+.vscode/*
+
+#File di output
+logic/out_*.txt

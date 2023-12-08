@@ -246,7 +246,7 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 				m = m1; //nuovo uomo non accoppiato
 				breakmarriage_fail = false;
 				break;
-			} else if (accept_proposal(women_preferences, n, w, m, old_reversed_M[w])) { //step 2b
+			} else if (marking[w] > 0 && accept_proposal(women_preferences, n, w, m, old_reversed_M[w])) { //step 2b
 				breakmarriage_fail = false;
 				printf("Proposta che vuole accettare, ma e' marcata!\n");
 				old_marking = marking[w];
@@ -269,6 +269,7 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 						printf("\nAZKABAN! %i %i\n",marking[w],m1);
 						reversed_M[w] = m;
 						m = m1;
+						//men_preferences_indexes[m]-=1;
 						break;
 					}
 				}
