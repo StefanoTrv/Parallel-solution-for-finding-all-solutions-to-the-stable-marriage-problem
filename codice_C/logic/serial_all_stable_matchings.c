@@ -26,11 +26,23 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 	results_list->last=results_list->first;
 	printf("e\n");
 
+	//testing
+	struct RotationsListElement* testing_list = free_rotations_list->first;
+	int count = 0;
+	while (testing_list!=NULL){
+		printf(".");
+		count++;
+		testing_list=testing_list->next;
+	}
+	printf("\nABBIAMO TROVATO IN TUTTO %i ROTAZIONI LIBERE\n",count);
+	//testing
+
 	if(free_rotations_list->first!=NULL){
 		recursive_search(top_matching, n, free_rotations_list->first, results_list);
 	}
 	printf("f\n");
 	
 	free(top_matching);
+	//fare il free di free_rotations_list
 	return results_list;
 }

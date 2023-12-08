@@ -8,7 +8,7 @@ char* gale_shapley(int, int*, int*);
 int accept_proposal(int*, int, int, int, int);
 struct RotationsList* find_all_rotations(int*, int*, int, char*);
 void breakmarriage(char*, int, int, int*, int*, int*, int*, struct RotationsList*, struct RotationNode**, int*, int*, int);
-void pause_breakmarriage(int*, char*, char*, char*, struct RotationsList*, int, int, int, struct RotationNode**, int*, int*);
+void pause_breakmarriage(int*, char*, char*, char*, struct RotationsList*, int, int, struct RotationNode**, int*, int*);
 void recursive_search(char*, int, struct RotationsListElement*, struct ResultsList*);
 
 
@@ -61,12 +61,10 @@ int accept_proposal(int* women_preferences, int n, int w, int m, int m1) {
             return true;
         }
         if (women_preferences[w * n + i] == m1) {
-			//printf("FALSE!!!!!");
+			printf("\nProposta rifiutata\n");
             return false;
         }
     }
-	//printf("ERROR!");
-	//printf("\n");
     return 0;
 }
 
@@ -111,7 +109,6 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 	int* marking = (int*) malloc(sizeof (int) * n); //-1 unmarked, n marked ma non associata, altri sono la donna precedente
 	int rotation_index = 0; //per indicizzare le rotationi su already_added_predecessors
 	int* already_added_predecessors = (int*) malloc(sizeof (int) * (n*n)); //per ridurre il numero di archi nel grafo delle rotazioni
-	printf("A\n");
 
 	for (int j = 0; j < n; j++) {
 		m_i[j] = top_matching[j];
@@ -122,7 +119,6 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 	for (int j = 0; j < n*n; j++) {
 		already_added_predecessors[j] = false;
 	}
-	printf("B\n");
 	//escludiamo le preferenze sicuramente non presenti in un matrimonio stabile
 	printf("men_preferences_indexes[j]\n");
 	for (int j = 0; j < n; j++) {
@@ -133,11 +129,10 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 		men_preferences_indexes[j] = k+1;//scartiamo quelle attuali, teniamo solo quelle diverse
 		printf("%i  ",men_preferences_indexes[j]);
 	}
-	printf("\nC\n");
 
 	int old_m = 0;
 	while (true) {
-		printf("C1\n");
+		printf("\n\n|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\nINIZIO ITERAZIONE CICLO DI FIND_ALL_ROTATIONS\n");
 		//STEP 1
 		int m = -1;
 		//troviamo il primo uomo diverso tra m_i e bottom_matching
@@ -148,12 +143,10 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 				break;
 			}
 		}
-		printf("C2\n");
 
 		if (m < 0) { //m_i == bottom_matching
 			break;
 		}
-		printf("C3\n");
 		
 		printf("while di find_all_rotations::\tm = %i, w = %i",m,m_i[m]);
 		
@@ -163,10 +156,9 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 		printf("\t\t%i\n",w);
 		breakmarriage(m_i, m, n, men_preferences, men_preferences_indexes, women_preferences, marking, free_rotations_list, 
 					  last_to_have_modified, &rotation_index, already_added_predecessors, w);
-		printf("\n");
-		printf("C4\n");
+		
+		printf("\n|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n");
 	}
-	printf("D\n");
 	free(last_to_have_modified);
 	free(m_i);
 	free(marking);
@@ -174,7 +166,6 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 	free(men_preferences_indexes);
 	free(inverted_bottom_matching);
 	free(bottom_matching);
-	printf("E\n");
 	return free_rotations_list;
 }
 
@@ -193,7 +184,7 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 	}
 	printf("\n");
 	int i = 0;
-	while (men_preferences[m * n + i] != M[m]) {
+	while (men_preferences[m * n + i] != M[m]) {//serve?
 		i++;
 	}
 	men_preferences_indexes[m] = i + 1;
@@ -206,10 +197,8 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 	}
 	int w, m1, breakmarriage_fail, k, old_marking;
 	int previous_woman = first_woman;
-	printf("I\n");
 
 	while(true) {
-		printf("II\n");
 		printf("\nwhile di breakmarriage: +++++++++++++++++++++++++\n");
 		printf("marking\n");
 		for (int i=0;i<n;i++){
@@ -225,7 +214,7 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 		//m diventa m' dell'articolo all'interno del ciclo
 		printf("m_p_i[%i] = %i\n",m,men_preferences_indexes[m]);
 		for (i = men_preferences_indexes[m]; i < n; i++) {
-			printf("\nFOR di breakmarriage: +++++++++++++++++++++++++\n");
+			printf("\nFOR di breakmarriage con m=%i e w=%i: +++++++++++++++++++++++++\n",m,men_preferences[m * n + i]);
 			printf("marking\n");
 			for (int i=0;i<n;i++){
 				printf("%i, ",marking[i]);
@@ -235,17 +224,15 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 				printf("%i, ",reversed_M[i]);
 			}
 			printf("\n+++++++++++++++++++++++++\n");
-			printf("III\t\ti: %i, m: %i, mpi[m * n + i]: %i, ",i,m,men_preferences[m * n + i]);
+			printf("i: %i, m: %i, mpi[m * n + i]: %i, ",i,m,men_preferences[m * n + i]);
 			w = men_preferences[m * n + i]; //il w dell'articolo
 			//prendo m1 (attuale compagno di w) e lo confronto con m
 			m1 = reversed_M[w];
 			printf("m1: %i\n",m1);
 			//se w preferisce m a m1, sciolgo (w, m1) e creo (w, m)
 			printf("La donna %i che ha il marking %i ha ricevuto dall'uomo %i una proposta.\n",w,marking[w],m);
-			printf("IV\n");
 			if (marking[w] < 0 && accept_proposal(women_preferences, n, w, m, m1)) { //step 2a
 				printf("Proposta accettata senza marking.\n");
-				printf("V\n");
 				k = men_preferences_indexes[m]; //aggiorniamo indice
 				while (men_preferences[k] != w) {
 					k++;
@@ -253,73 +240,51 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 				men_preferences_indexes[m] = k+1;
 				reversed_M[w] = m;
 				marking[w] = previous_woman;
-				printf("\t\t 183: %i -> %i\n",w,previous_woman);
+				printf("\t\t w passa da a : %i -> %i\n",previous_woman,w);
 				previous_woman = w;
 				printf("\t\t m: %i \tm1: %i\n",m,m1);
 				m = m1; //nuovo uomo non accoppiato
-				printf("VI\n");
 				breakmarriage_fail = false;
-				printf("VIb %i\n",breakmarriage_fail);
 				break;
 			} else if (accept_proposal(women_preferences, n, w, m, old_reversed_M[w])) { //step 2b
 				breakmarriage_fail = false;
 				printf("Proposta che vuole accettare, ma e' marcata!\n");
-				printf("VII\n");
 				old_marking = marking[w];
-				//test
-				//k = men_preferences_indexes[m]; //aggiorniamo indice
-				//while (men_preferences[k] != w) {
-				//	k++;
-				//}
-				//men_preferences_indexes[m] = k+1;
 				reversed_M[w] = m;
-				//marking[w] = previous_woman;
-				//previous_woman = w;
-				//m = m1; //nuovo uomo non accoppiato
-				//test
-				pause_breakmarriage(marking, M, reversed_M, old_reversed_M, free_rotations_list, w, m, previous_woman, 
+				pause_breakmarriage(marking, M, reversed_M, old_reversed_M, free_rotations_list, w, previous_woman, 
 									last_to_have_modified, rotation_index, already_added_predecessors);
 				reversed_M[w] = m1;
-				printf("VIII\n");
 				printf("\t\tformer_wife = %i\tw = %i\n",former_wife,w);
 				if (former_wife == w) { //3c: w = w'
-					printf("IX\n");
 					reversed_M[w] = m;
 					free(reversed_M);
 					free(old_reversed_M);
 					return; //al passo 1
-				} else {
-					printf("X\n");
+				} else {//3d
 					if (!accept_proposal(women_preferences, n, w, m, m1)) {
-						printf("XII\n");
 						marking[w] = old_marking;
 						previous_woman = w;
-						continue;
+						continue;//al passo 2
 					} else {
-						printf("XI\n");
+						printf("\nAZKABAN! %i %i\n",marking[w],m1);
 						reversed_M[w] = m;
 						m = m1;
 						break;
 					}
-					
 				}
 			}
-			printf("XIII\t\t%i\n",i);
 		}
-		printf("XIV %i\n",breakmarriage_fail);
 		if (breakmarriage_fail) { //non abbiamo trovato un accoppiamento stabile per m
-			printf("XV\n");
 			printf("NON DOVREBBE MAI ESSERE QUI!\n");
 			free(reversed_M);
 			free(old_reversed_M);
 			return;
 		}
-		printf("XVI\n");
 	}
 }
 
 
-void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reversed_M, struct RotationsList* free_rotations_list, int w, int m, 
+void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reversed_M, struct RotationsList* free_rotations_list, int w, 
 					     int previous_woman, struct RotationNode** last_to_have_modified, int* rotation_index, int* already_added_predecessors) {
 	printf("pause_breakmarriage:\n");
 	for (int i=0;i<8;i++){
@@ -342,65 +307,53 @@ void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reve
 	*rotation_index += 1;
 	struct RotationsList* predecessors_list = (struct RotationsList*)malloc(sizeof (struct RotationsList)); //i predecessori del nodo che stiamo creando, per poter resettare already_added_predecessors
 	predecessors_list->first = NULL;
+	predecessors_list->last=NULL;
 	struct RotationList* list_el = NULL;
 	struct SuccessorsList* new_successor;
-	printf("\n.");
-	printf("\nw = %i\n",w);
+	printf("\nw = %i\nalready_added_predecessors:\n",w);
+	for(int ii=0;ii<8*8;ii++){
+		printf("%i",already_added_predecessors[ii]);
+	}
 	while(w2 != w || go_on) {
 		printf("\nWHILE di pause: ----------------------\n");
 		for (int i=0;i<8;i++){
 			printf("%i, ",marking[i]);
 		}
 		printf("\n");
+		printf("w2: %i\t-\tprevious_woman:%i\n",w2,previous_woman);
 		go_on = false;
-		printf("\n..");
 		//costruire lista della rotazione dalla coda alla testa
 		list_el = (struct RotationList*)malloc(sizeof (struct RotationList));
 		list_el->man = old_reversed_M[w2];
 		list_el->woman = w2;
 		printf("\ncoppia rotazione: uomo->%i donna->%i",list_el->man,list_el->woman);
-		printf("\n..a");
 		list_el->next = prev_list_el;
-		printf("\n..b");
 		prev_list_el = list_el;
-		printf("\n..c");
 		//aggiorniamo predecessori e last_to_have_modified
+		printf("\nIl puntatore a %i e' NULL? %i",old_reversed_M[w2],last_to_have_modified[old_reversed_M[w2]]==NULL);
 		if (last_to_have_modified[old_reversed_M[w2]] != NULL && !already_added_predecessors[last_to_have_modified[old_reversed_M[w2]]->index]) {
 			new_successor = (struct SuccessorsList*)malloc(sizeof (struct SuccessorsList));
-			printf("\n..d");
 			new_successor->value = rotation_node;
-			printf("\n...");
-			printf("\n....");
 			//aggiungiamo la rotazione solo una volta ad ogni predecessore
 			new_successor->next = last_to_have_modified[old_reversed_M[w2]]->successors;
 			last_to_have_modified[old_reversed_M[w2]]->successors = new_successor;
 			no_predecessors = false;
 			rotation_node->missing_predecessors += 1;
-			printf("\n....a");
 			already_added_predecessors[last_to_have_modified[old_reversed_M[w2]]->index] = true;
-			printf("\n....b");
 			appendRotationsList(predecessors_list, last_to_have_modified[old_reversed_M[w2]]);
-			printf("\nX");
+			printf("\n=== Trovato il predecessore: %i, ",last_to_have_modified[old_reversed_M[w2]]->index);
 		}
-		printf("\nX...");
 		last_to_have_modified[old_reversed_M[w2]] = rotation_node;
-		printf("\n\t1");
 		//aggiorniamo old_reversed_M (i = i+1)
 		old_reversed_M[w2] = reversed_M[w2];
-		printf("\n\t2");
 		//aggiorna M
 		M[old_reversed_M[w2]] = w2;
-		printf("\n\t3");
 		//resettare marking
 		printf("\n\t\tmarking[w2]: %i, w2: %i, ora diventa -1",marking[w2],w2);
 		marking[w2] = -1;
-		printf("\n\t4");
 		//update previous_woman
-		printf("\n\t\tw2: %i _ previous_woman:%i",w2,previous_woman);
 		w2 = previous_woman;
 		previous_woman = marking[w2];
-		printf("\n\t5");
-		printf("\nX....");
 		printf("\nfine del while di pause:\nM[i] = ");
 		for (int i=0;i<8;i++){
 			printf("%i, ",M[i]);
@@ -417,39 +370,30 @@ void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reve
 		for (int i=0;i<8;i++){
 			printf("%i, ",marking[i]);
 		}
+		printf("\nNuovo w2 per il prossimo ciclo: %i",w2);
 	}
-
-	printf("\nXX");
 
 	rotation_node->rotation = prev_list_el;
 
 	if (no_predecessors) {
-		printf("\nXX.");
 		appendRotationsList(free_rotations_list, rotation_node);
+		printf("\nNuova rotazione libera: %i",no_predecessors);
 	}
-	printf("\nXX..");
 
 	//ripristiniamo already_added_predecessors, deallocando lo spazio
 	struct RotationsListElement* rot_list_el = predecessors_list->first;
 	struct RotationsListElement * temp;
 	
-	printf("\nXX..a");
+	printf("\n==== Puliti gli indici di questi nodi:\n");
 	while (rot_list_el != NULL) {
-		printf("\nXX..b");
-		printf("\n\t\t index = %i",rot_list_el->value->index);
+		printf("%i, ",rot_list_el->value->index);
 		already_added_predecessors[rot_list_el->value->index] = false;
-		printf("\nXX..c");
 		temp = rot_list_el;
-		printf("\nXX..d");
 		rot_list_el = rot_list_el->next;
-		printf("\nXX..e");
 		free(temp);
-		printf("\nXX..f");
 	}
-	printf("\nXX...");
 
 	free(predecessors_list);
-	printf("\nXX....\n");
 	return;
 }
 
