@@ -183,12 +183,8 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 		printf("%i, ",M[i]);
 	}
 	printf("\n");
-	int i = 0;
-	while (men_preferences[m * n + i] != M[m]) {//serve?
-		i++;
-	}
-	men_preferences_indexes[m] = i + 1;
 	int former_wife = M[m]; //il w dell'articolo, donna con cui l'uomo è accoppiato e si deve separare
+	int i;
 	char* reversed_M = (char*)malloc(sizeof (char) * n);
 	char* old_reversed_M = (char*)malloc(sizeof (char) * n);
 	for (i = 0; i < n; i++) {
@@ -197,6 +193,8 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 	}
 	int w, m1, breakmarriage_fail, k, old_marking;
 	int previous_woman = first_woman;
+
+	men_preferences_indexes[m] += 1;//tolgo dalle preferenze la donna con cui m era fidanzato
 
 	while(true) {
 		printf("\nwhile di breakmarriage: +++++++++++++++++++++++++\n");
@@ -272,19 +270,13 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 						reversed_M[w] = m;
 						m = m1;
 						previous_woman=M[m];
-						/*for(int i=0;i<n;i++){
-							if(men_preferences[m * n + i]==w){
-								men_preferences_indexes[m]=i+1;
-								break;
-							}
-						}*/
 						break;
 					}
 				}
 			}
 		}
 		if (breakmarriage_fail) { //non abbiamo trovato un accoppiamento stabile per m
-			printf("NON DOVREBBE MAI ESSERE QUI!\n");
+			printf("ERRORE! NON DOVREBBE MAI ESSERE QUI!");
 			free(reversed_M);
 			free(old_reversed_M);
 			return;
@@ -387,6 +379,8 @@ void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reve
 	if (no_predecessors) {
 		appendRotationsList(free_rotations_list, rotation_node);
 		printf("\nNuova rotazione libera: %i",no_predecessors);
+	}else{
+		printf("\nNuova rotazione non libera.");
 	}
 
 	//ripristiniamo already_added_predecessors, deallocando lo spazio
