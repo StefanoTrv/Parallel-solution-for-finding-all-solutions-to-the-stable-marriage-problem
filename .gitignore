@@ -55,4 +55,4 @@ dkms.conf
 .vscode/*
 
 #File di output
-logic/out_*.txt
+logic/out*.txt

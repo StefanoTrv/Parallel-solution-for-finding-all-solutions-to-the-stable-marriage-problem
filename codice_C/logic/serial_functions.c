@@ -213,7 +213,7 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 		//itero sulle preferenze di m
 		//m diventa m' dell'articolo all'interno del ciclo
 		printf("m_p_i[%i] = %i\n",m,men_preferences_indexes[m]);
-		printf("L'indice meno uno punta a %i, mentre la donna precedente era %i.\n",men_preferences[men_preferences_indexes[m]-1],M[m]);
+		printf("L'indice meno uno punta a %i, mentre la donna precedente era %i.\n",men_preferences[m*n+men_preferences_indexes[m]-1],M[m]);
 		for (i = men_preferences_indexes[m]; i < n; i++) {
 			printf("\nFOR di breakmarriage con m=%i e w=%i: +++++++++++++++++++++++++\n",m,men_preferences[m * n + i]);
 			printf("marking\n");
@@ -271,6 +271,7 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 						printf("\nAZKABAN! %i %i\n",marking[w],m1);
 						reversed_M[w] = m;
 						m = m1;
+						previous_woman=M[m];
 						/*for(int i=0;i<n;i++){
 							if(men_preferences[m * n + i]==w){
 								men_preferences_indexes[m]=i+1;
