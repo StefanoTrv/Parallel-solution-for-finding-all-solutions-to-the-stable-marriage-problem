@@ -21,7 +21,7 @@ void free_rotations_list(struct RotationsList *rotations_list){
 	while (rotations_list_element!=NULL){
 		rotation_node=rotations_list_element->value;
 		rotation=rotation_node->rotation;
-		while(rotation_node!=NULL){
+		while(rotation!=NULL){
 			temp_r=rotation;
 			rotation=rotation->next;
 			free(temp_r);

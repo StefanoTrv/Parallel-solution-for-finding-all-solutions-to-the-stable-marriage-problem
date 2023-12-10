@@ -1,5 +1,6 @@
 #include "..\data_structures\data_structures.h"
 #include <stdlib.h>
+#include "..\utilities\utilities.h"
 
 struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women_preferences){
 	printf("a\n");
