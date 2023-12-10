@@ -12,7 +12,7 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 	}
 	printf("c\n");
 	//crea il grafo delle rotazioni
-	struct RotationsList* free_rotations_list = find_all_rotations(men_preferences,women_preferences, n, top_matching_copy);
+	struct RotationsList* rotations_list = find_all_rotations(men_preferences,women_preferences, n, top_matching_copy);
 	printf("d\n");
 	
 	//aggiungo top matching ai risultati
@@ -27,7 +27,7 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 	printf("e\n");
 
 	//testing
-	struct RotationsListElement* testing_list = free_rotations_list->first;
+	struct RotationsListElement* testing_list = rotations_list->first;
 	int count = 0;
 	while (testing_list!=NULL){
 		printf(".");
@@ -37,12 +37,12 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 	printf("\nABBIAMO TROVATO IN TUTTO %i ROTAZIONI LIBERE\n",count);
 	//testing
 
-	if(free_rotations_list->first!=NULL){
-		recursive_search(top_matching, n, free_rotations_list->first, results_list);
+	if(rotations_list->first!=NULL){
+		recursive_search(top_matching, n, rotations_list->first, results_list);
 	}
 	printf("f\n");
 	
 	free(top_matching);
-	//fare il free di free_rotations_list
+	free_rotations_list(rotations_list);
 	return results_list;
 }
