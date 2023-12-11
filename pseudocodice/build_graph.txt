@@ -1,0 +1,65 @@
+BUILD_GRAPH(n, rotations_list, top_matching, men_preferences_list, women_preferences_list):
+	rotation_list_element = rotations_list.first
+	label_matrix = *List_of_rotations[n][n]
+	is_stable_matrix = bool[n][n]
+	last_labelled_pair_index = int[n]
+	last_stable_pair = int[n] ???
+	applied_labels = bool[rotations_list.last.index + 1]
+	
+	for (int i=0; i<n; i++)
+			for (int j=0; j<n; j++)
+				label_matrix[i][j] = NULL;
+	
+	for (int i=0; i<n; i++)
+		last_labelled_pair_index[i] = -1
+		last_stable_pair[i] = top_matching[i]
+		
+	for (int i=0; i<rotations_list.last.index+1; i++)
+		applied_labels[i] = False
+	
+	while (rotation_list_element != NULL)
+		pair_list_element = rotation_list_element.value.rotation 
+		while (pair_list_element != NULL)
+			man = pair_list_element.man
+			woman = pair_list_element.woman
+			men_index = last_labelled_pair_index[woman] + 1
+			while (women_preferences_list[woman][men_index] != man)
+				is_stable_matrix[woman][men_index] = False
+				label_matrix[woman][men_index] = *rotation_list_element.value
+				men_index++
+			is_stable_matrix[woman][men_index] = True
+			label_matrix[woman][men_index] = *rotation_list_element.value
+			last_labelled_pair_index[woman] = men_index
+			pair_list_element = pair_list_element.next
+		rotation_list_element = rotation_list_element.next
+	
+	for (int m=0; m<n; m++)
+		k = 0
+		while(top_matching[m] != men_preferences_list[m][k])
+			k++
+		last_applied_rotation = NULL
+		for (int j = k; j<n; j++)
+			p = NULL
+			w = men_preferences_list[m][j]
+			if (label_matrix[w][m] == NULL)
+				break
+			if (is_stable_matrix[w][m]) //label di tipo 1
+				if (p != NULL) 
+					new_successor = NEW_LIST_EL()
+					new_successor.next = p.successors
+					new_successor.value = label_matrix[w][m]
+					p.successors = new_successor
+				applied_rotation[label_matrix[w][m].index] = True
+			else if(!applied_rotation[label_matrix[w][m].index]) //label di tipo 2
+				new_successor = NEW_LIST_EL()
+				new_successor.next = label_matrix[w][m].successors
+				new_successor.value = p
+				label_matrix[w][m].successors = new_successor
+				applied_rotation[label_matrix[w][m].index] = True
+				
+		//resettare applied_rotation
+		for (int j=k; j<n; j++)
+			w = men_preferences_list[m][j]
+			if (label_matrix[w][m] == NULL)
+				break 
+			applied_rotation[label_matrix[w][m].index] = False
