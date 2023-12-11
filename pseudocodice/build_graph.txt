@@ -3,7 +3,7 @@ BUILD_GRAPH(n, rotations_list, top_matching, men_preferences, women_preferences)
 	label_matrix = *List_of_rotations[n][n]
 	is_stable_matrix = bool[n][n]
 	last_labelled_pair_index = int[n]
-	applied_rotations = bool[rotations_list.last.index + 1]
+	applied_rotations = bool[rotations_list.last.value.index + 1]
 	
 	for (int i=0; i<n; i++)
 			for (int j=0; j<n; j++)
@@ -12,7 +12,7 @@ BUILD_GRAPH(n, rotations_list, top_matching, men_preferences, women_preferences)
 	for (int i=0; i<n; i++)
 		last_labelled_pair_index[i] = -1
 		
-	for (int i=0; i<rotations_list.last.index+1; i++)
+	for (int i=0; i<rotations_list.last.value.index+1; i++)
 		applied_rotations[i] = False
 	
 	while (rotation_list_element != NULL)
