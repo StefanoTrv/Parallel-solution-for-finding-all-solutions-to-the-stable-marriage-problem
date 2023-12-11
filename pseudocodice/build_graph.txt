@@ -35,9 +35,8 @@ BUILD_GRAPH(n, rotations_list, top_matching, men_preferences, women_preferences)
 		k = 0
 		while(top_matching[m] != men_preferences[m][k])
 			k++
-		last_applied_rotations = NULL
+		p = NULL
 		for (int j = k; j<n; j++)
-			p = NULL
 			w = men_preferences[m][j]
 			if (label_matrix[w][m] == NULL)
 				break
