@@ -22,11 +22,11 @@ BUILD_GRAPH(n, rotations_list, top_matching, men_preferences, women_preferences)
 			woman = pair_list_element.woman
 			men_index = last_labelled_pair_index[woman] + 1
 			while (women_preferences[woman][men_index] != man)
-				is_stable_matrix[woman][men_index] = False
-				label_matrix[woman][men_index] = *rotation_list_element.value
+				is_stable_matrix[woman][man] = False
+				label_matrix[woman][man] = *rotation_list_element.value
 				men_index++
-			is_stable_matrix[woman][men_index] = True
-			label_matrix[woman][men_index] = *rotation_list_element.value
+			is_stable_matrix[woman][man] = True
+			label_matrix[woman][man] = *rotation_list_element.value
 			last_labelled_pair_index[woman] = men_index
 			pair_list_element = pair_list_element.next
 		rotation_list_element = rotation_list_element.next
