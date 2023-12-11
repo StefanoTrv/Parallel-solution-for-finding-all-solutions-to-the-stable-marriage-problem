@@ -37,26 +37,26 @@ BUILD_GRAPH(n, rotations_list, top_matching, men_preferences, women_preferences)
 			k++
 		p = NULL
 		for (int j = k; j<n; j++)
-			w = men_preferences[m][j]
-			if (label_matrix[w][m] == NULL)
+			woman = men_preferences[m][j]
+			if (label_matrix[woman][m] == NULL)
 				break
-			if (is_stable_matrix[w][m]) //label di tipo 1
+			if (is_stable_matrix[woman][m]) //label di tipo 1
 				if (p != NULL) 
 					new_successor = NEW_LIST_EL()
 					new_successor.next = p.successors
-					new_successor.value = label_matrix[w][m]
+					new_successor.value = label_matrix[woman][m]
 					p.successors = new_successor
-				applied_rotations[label_matrix[w][m].index] = True
-			else if(!applied_rotations[label_matrix[w][m].index]) //label di tipo 2
+				applied_rotations[label_matrix[woman][m].index] = True
+			else if(!applied_rotations[label_matrix[woman][m].index]) //label di tipo 2
 				new_successor = NEW_LIST_EL()
-				new_successor.next = label_matrix[w][m].successors
+				new_successor.next = label_matrix[woman][m].successors
 				new_successor.value = p
-				label_matrix[w][m].successors = new_successor
-				applied_rotations[label_matrix[w][m].index] = True
+				label_matrix[woman][m].successors = new_successor
+				applied_rotations[label_matrix[woman][m].index] = True
 				
 		//resettare applied_rotations
 		for (int j=k; j<n; j++)
-			w = men_preferences[m][j]
-			if (label_matrix[w][m] == NULL)
+			woman = men_preferences[m][j]
+			if (label_matrix[woman][m] == NULL)
 				break 
-			applied_rotations[label_matrix[w][m].index] = False
+			applied_rotations[label_matrix[woman][m].index] = False
