@@ -9,6 +9,7 @@ int accept_proposal(int*, int, int, int, int);
 struct RotationsList* find_all_rotations(int*, int*, int, char*);
 void breakmarriage(char*, int, int, int*, int*, int*, int*, struct RotationsList*, int*, int);
 void pause_breakmarriage(int*, char*, char*, char*, struct RotationsList*, int, int, int*);
+void build_graph(int, struct RotationsList*, char*, int*, int*);
 void recursive_search(char*, int, struct RotationsListElement*, struct ResultsList*);
 
 
@@ -351,6 +352,164 @@ void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reve
 	appendRotationsList(rotations_list, rotation_node);
 
 	return;
+}
+
+void build_graph(int n, struct RotationsList* rotations_list, char* top_matching, int* men_preferences, int* women_preferences){
+	struct RotationsListElement* rotations_list_element = rotations_list->first;
+	struct RotationNode** label_matrix = (struct RotationNode**)malloc(sizeof (struct RotationNode*) * n * n);
+	int* is_stable_matrix = (int*)malloc(sizeof (int) * n * n);
+	int* last_labelled_pair_index = (int*)malloc(sizeof (int) * n);
+	int* applied_rotations = (int*)malloc(sizeof (int) * (rotations_list->last->value->index + 1));
+	struct RotationList* pair_list_element;
+	int man, woman,men_index, k, first_woman, next_woman;
+	struct RotationNode* p_star;
+	struct SuccessorsList* new_successor;
+
+	for (int i=0; i<n; i++){
+		for(int j=0; j<n; j++){
+			label_matrix[i*n+j]=NULL;
+			is_stable_matrix[j*n+i]=false;
+		}
+		woman = top_matching[i];
+		last_labelled_pair_index[woman]=n-1;
+		while(women_preferences[woman*n+last_labelled_pair_index[woman]]!=i){
+			printf("woman: %i, llp: %i\t",woman,last_labelled_pair_index[woman]);
+			last_labelled_pair_index[woman]--;
+		}
+		printf("\n");
+		//last_labelled_pair_index[i]=n;
+		is_stable_matrix[top_matching[i]*n+i]=true;
+	}
+	printf("\n");printf("\n");
+
+	for(int i=0; i<n; i++){
+		for(int j=0; j<n; j++){
+			printf("%i\t", is_stable_matrix[i*n+j]);
+		}
+		printf("\n");
+	}
+	printf("\n");printf("\n");
+	printf("\n");printf("\n");
+
+	for(int i=0; i<n; i++){
+		for(int j=0; j<n; j++){
+			printf("%i\t", !(label_matrix[i*n+j]==NULL));
+		}
+		printf("\n");
+	}
+	printf("\n");printf("\n");
+
+	for (int i=0; i<rotations_list->last->value->index+1; i++){
+		applied_rotations[i]=false;
+	}
+
+	while(rotations_list_element!=NULL){
+		printf("$");
+		pair_list_element = rotations_list_element->value->rotation;
+		first_woman=pair_list_element->woman;
+		while(pair_list_element!=NULL){
+			man=pair_list_element->man;
+			if(pair_list_element->next==NULL){
+				next_woman=first_woman;
+			}else{
+				next_woman=pair_list_element->next->woman;
+			}
+			woman=pair_list_element->woman;
+			printf("\n\tO - man: %i, woman: %i, next_woman: %i, last_labelled_pair-index: %i\n\t",man,woman,next_woman,last_labelled_pair_index[next_woman]-1);
+			men_index=last_labelled_pair_index[next_woman]-1;
+			while(women_preferences[next_woman*n+men_index]!=man){
+				printf("'(wp: %i, man: %i)",women_preferences[next_woman*n+men_index],man);
+				is_stable_matrix[next_woman*n+women_preferences[next_woman*n+men_index]]=false;
+				label_matrix[next_woman*n+women_preferences[next_woman*n+men_index]]=rotations_list_element->value;
+				men_index--;
+			}
+			is_stable_matrix[next_woman*n+man]=true;
+			last_labelled_pair_index[next_woman]=men_index;
+			label_matrix[woman*n+man]=rotations_list_element->value;
+			pair_list_element=pair_list_element->next;
+		}
+		printf("\n");
+		rotations_list_element=rotations_list_element->next;
+	}
+	printf("\n");printf("\n");
+
+	for(int i=0; i<n; i++){
+		for(int j=0; j<n; j++){
+			printf("%i\t", is_stable_matrix[i*n+j]);
+		}
+		printf("\n");
+	}
+	printf("\n");printf("\n");
+	printf("\n");printf("\n");
+
+	for(int i=0; i<n; i++){
+		for(int j=0; j<n; j++){
+			printf("%i\t", !(label_matrix[i*n+j]==NULL));
+		}
+		printf("\n");
+	}
+	printf("\n");printf("\n");
+	
+	for(int m=0; m<n; m++){
+		k=0;
+		while(top_matching[m]!=men_preferences[m*n+k]){
+			k++;
+		}
+		printf("k = %i\n",k);
+		p_star=NULL;
+		for(int j=k;j<n;j++){
+			woman = men_preferences[m*n+j];
+			printf("\tm: %i, j: %i, woman: %i\t",m,j,woman);
+			if(label_matrix[woman*n+m]==NULL){
+				printf("null\n");
+				continue;
+			}
+			printf("\n");
+			if(is_stable_matrix[woman*n+m]){//label di tipo 1
+				printf("Label di tipo 1 (man: %i, woman: %i)\n",m,woman);
+				if(p_star!=NULL){
+					printf("Ci siamo!\n");
+					new_successor=(struct SuccessorsList*)malloc(sizeof (struct SuccessorsList));
+					new_successor->next=p_star->successors;
+					new_successor->value=label_matrix[woman*n+m];
+					p_star->successors=new_successor;//add
+					label_matrix[woman*n+m]->missing_predecessors++;
+					printf("label_matrix[woman*n+m]->index: %i\tp->successors: %p\tNULL: %p\tlabel_matrix[woman*n+m]->missing_predecessors: %i\n",label_matrix[woman*n+m]->index,p_star->successors,NULL,label_matrix[woman*n+m]->missing_predecessors);
+				}
+				p_star=label_matrix[woman*n+m];//aggiunto questo
+				applied_rotations[label_matrix[woman*n+m]->index]=true;
+			} else if(!applied_rotations[label_matrix[woman*n+m]->index]){//label di tipo 2
+				if(p_star==NULL) continue;
+				printf("Label di tipo 2\n");
+				new_successor=(struct SuccessorsList*)malloc(sizeof (struct SuccessorsList));
+				printf(".");
+				new_successor->next=label_matrix[woman*n+m]->successors;
+				new_successor->value=p_star;
+				printf(",");
+				label_matrix[woman*n+m]->successors=new_successor;
+				applied_rotations[label_matrix[woman*n+m]->index]=true;
+				printf(".%p\n",p_star);
+				p_star->missing_predecessors++;//add
+				printf("Nuovo missing_predecessors per %i: %i\n",p_star->index,p_star->missing_predecessors);
+				printf(",");
+			}else{
+				printf("No label\n");
+			}
+		}
+		//resettare applied_rotations
+		for(int j=k;j<n;j++){
+			woman=men_preferences[m*n+j];
+			if(label_matrix[woman*n+m]==NULL){
+				continue;
+			}
+			applied_rotations[label_matrix[woman*n+m]->index]=false;		
+		}
+	}
+
+	free(label_matrix);
+	free(is_stable_matrix);
+	free(last_labelled_pair_index);
+	free(applied_rotations);
 }
 
 

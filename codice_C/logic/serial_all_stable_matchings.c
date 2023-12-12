@@ -12,9 +12,52 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 		top_matching_copy[i] = top_matching[i];
 	}
 	printf("c\n");
-	//crea il grafo delle rotazioni
+	//crea la lista delle rotazioni
 	struct RotationsList* rotations_list = find_all_rotations(men_preferences, women_preferences, n, top_matching_copy);
 	printf("d\n");
+	//crea il grafo delle rotazioni
+	build_graph(n, rotations_list, top_matching, men_preferences, women_preferences);
+
+	//calcolo la lista delle rotazioni libere
+	//SBAGLIATO!!
+	struct RotationsList* free_rotations_list = (struct RotationsList*)malloc(sizeof (struct RotationsList));
+	free_rotations_list->first=NULL;
+	free_rotations_list->last=NULL;
+	struct RotationsListElement* list_el = rotations_list->first;
+	while(list_el!=NULL){
+		printf("list_el->value->missing_predecessors: %i\n",list_el->value->missing_predecessors);
+		if(list_el->value->missing_predecessors==0){
+			appendRotationsList(free_rotations_list,list_el->value);
+		}
+		list_el=list_el->next;
+	}
+	///test
+	printf("\n");
+	list_el = rotations_list->first;
+	struct RotationList* le;
+	struct SuccessorsList* sl;
+	while(list_el!=NULL){
+		le=list_el->value->rotation;
+		while(le!=NULL){
+			printf("(%i,%i), ",le->man,le->woman);
+			le=le->next;
+		}
+		printf("ha indice %i e ",list_el->value->index);
+		if(list_el->value->missing_predecessors>0) printf("non ");
+		printf("e' una rotazione libera");
+		if(list_el->value->missing_predecessors>0){
+			printf(" con %i predecessori: ",list_el->value->missing_predecessors);
+			sl=list_el->value->successors;
+			while(sl!=NULL) {
+				printf("%i, ",sl->value->index);
+				sl=sl->next;
+			}
+		}
+		printf("\n");
+		list_el=list_el->next;
+	}
+
+	//test
 	
 	//aggiungo top matching ai risultati
 	struct ResultsList* results_list = (struct ResultsList*) malloc(sizeof (struct ResultsList));
@@ -28,7 +71,7 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 	printf("e\n");
 
 	//testing
-	struct RotationsListElement* testing_list = rotations_list->first;
+	struct RotationsListElement* testing_list = free_rotations_list->first;
 	int count = 0;
 	while (testing_list!=NULL){
 		printf(".");
@@ -39,11 +82,19 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 	//testing
 
 	if(rotations_list->first != NULL){
-		recursive_search(top_matching, n, rotations_list->first, results_list);
+		recursive_search(top_matching, n, free_rotations_list->first, results_list);
 	}
 	printf("f\n");
 	
 	free(top_matching);
-	free_rotations_list(rotations_list);
+	free_rotations_list_struct(rotations_list);
+	list_el=free_rotations_list->first;
+	struct RotationsListElement* temp;
+	while(list_el!=NULL){
+		temp=list_el;
+		list_el=list_el->next;
+		free(temp);
+	}
+	free(free_rotations_list);
 	return results_list;
 }

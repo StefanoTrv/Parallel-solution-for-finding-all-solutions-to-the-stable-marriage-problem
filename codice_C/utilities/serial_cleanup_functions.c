@@ -12,7 +12,7 @@ void free_results(struct ResultsList* results){
 	free(results);
 }
 
-void free_rotations_list(struct RotationsList *rotations_list){
+void free_rotations_list_struct(struct RotationsList *rotations_list){
 	struct RotationsListElement *rotations_list_element, *temp_rle;
 	rotations_list_element = rotations_list->first;
 	struct RotationNode *rotation_node;

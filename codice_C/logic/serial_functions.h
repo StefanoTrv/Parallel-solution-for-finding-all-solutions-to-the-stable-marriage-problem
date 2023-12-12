@@ -5,6 +5,7 @@
 
 char* gale_shapley(int, int*, int*);
 struct RotationsList* find_all_rotations(int*, int*, int, char*);
+void build_graph(int, struct RotationsList*, char*, int*, int*);
 void recursive_search(char*, int, struct RotationsListElement*, struct ResultsList*);
 
 struct ResultsList* all_stable_matchings(int n, int*, int*);

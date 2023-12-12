@@ -39,27 +39,27 @@ struct RotationsListElement { //free_rotations_list
 };
 
 void appendResultsList(struct ResultsList* list, char* result){
-	struct ResultsListElement *new = malloc(sizeof (struct ResultsListElement));
-	new->value = result;
-	new->next = NULL;
+	struct ResultsListElement *new_el = (struct ResultsListElement*)malloc(sizeof (struct ResultsListElement));
+	new_el->value = result;
+	new_el->next = NULL;
 	if (list->first==NULL){
-		list->first = new;
-		list->last=new;
+		list->first = new_el;
+		list->last=new_el;
 	}else{
-		list->last->next = new;
-		list->last = new;
+		list->last->next = new_el;
+		list->last = new_el;
 	}
 }
 
 void appendRotationsList(struct RotationsList* list, struct RotationNode* rotation_node){
-	struct RotationsListElement *new = malloc(sizeof (struct RotationsListElement));
-	new->value = rotation_node;
-	new->next = NULL;
+	struct RotationsListElement *new_el = (struct RotationsListElement*)malloc(sizeof (struct RotationsListElement));
+	new_el->value = rotation_node;
+	new_el->next = NULL;
 	if (list->first==NULL){
-		list->first = new;
-		list->last=new;
+		list->first = new_el;
+		list->last=new_el;
 	}else{
-		list->last->next = new;
-		list->last = new;
+		list->last->next = new_el;
+		list->last = new_el;
 	}
 }
