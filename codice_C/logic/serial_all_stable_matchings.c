@@ -45,13 +45,11 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 		printf("ha indice %i e ",list_el->value->index);
 		if(list_el->value->missing_predecessors>0) printf("non ");
 		printf("e' una rotazione libera");
-		if(list_el->value->missing_predecessors>0){
-			printf(" con %i predecessori: ",list_el->value->missing_predecessors);
-			sl=list_el->value->successors;
-			while(sl!=NULL) {
-				printf("%i, ",sl->value->index);
-				sl=sl->next;
-			}
+		printf(" con %i predecessori e i seguenti successori: ",list_el->value->missing_predecessors);
+		sl=list_el->value->successors;
+		while(sl!=NULL) {
+			printf("%i, ",sl->value->index);
+			sl=sl->next;
 		}
 		printf("\n");
 		list_el=list_el->next;
