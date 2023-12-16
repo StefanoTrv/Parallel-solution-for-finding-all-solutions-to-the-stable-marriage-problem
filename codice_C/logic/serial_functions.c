@@ -127,7 +127,7 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 		while (men_preferences[j * n + k] != m_i[j]) {
 			k++;
 		}
-		men_preferences_indexes[j] = k + 1;//scartiamo quelle attuali, teniamo solo quelle diverse
+		men_preferences_indexes[j] = k;//quelle attuali verranno scartate successivamente
 		printf("%i  ",men_preferences_indexes[j]);
 	}
 
@@ -191,9 +191,9 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 	int w, m1, breakmarriage_fail, k, old_marking;
 	int previous_woman = first_woman;
 
-	men_preferences_indexes[m] += 1;//tolgo dalle preferenze la donna con cui m era fidanzato
 
 	while(true) {
+		men_preferences_indexes[m] += 1;//tolgo dalle preferenze la donna con cui m era fidanzato
 		printf("\nwhile di breakmarriage: +++++++++++++++++++++++++\n");
 		printf("marking\n");
 		for (int i=0;i<n;i++){
@@ -233,7 +233,6 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 				while (men_preferences[m * n + k] != w) {
 					k++;
 				}
-				men_preferences_indexes[m] = k+1;
 				printf("Updated men_preferences_index[%i]=%i",m,k+1);
 				reversed_M[w] = m;
 				marking[w] = previous_woman;
