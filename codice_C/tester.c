@@ -24,7 +24,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     int seed, n, iterations;
-    if(argc == 4){
+    printf("%i\n\n\n",argc);
+    if(argc == 5){
         seed = strtol(argv[4], NULL, 10);
     } else {
         seed = 42;
