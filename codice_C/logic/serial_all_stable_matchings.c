@@ -3,9 +3,31 @@
 #include "..\utilities\utilities.h"
 
 struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women_preferences){
+	struct ResultsList* results_list = (struct ResultsList*) malloc(sizeof (struct ResultsList));
 	printf("a\n");
 	char* top_matching = gale_shapley(n,men_preferences,women_preferences);
 	printf("b\n");
+	char* inverted_bottom_matching = gale_shapley(n, women_preferences, men_preferences);
+	char* bottom_matching = (char*)malloc(sizeof (char) * n);
+
+	int only_one_matching=1;
+	for(int i = 0; i < n; i++){
+		bottom_matching[inverted_bottom_matching[i]] = i;
+	}
+	free(inverted_bottom_matching);
+	for(int i=0;i<n;i++){
+		if(top_matching[i]!=bottom_matching[i]){
+			only_one_matching=0;
+			break;
+		}
+	}
+	if(only_one_matching){
+		results_list->first = (struct ResultsListElement*) malloc(sizeof (struct ResultsListElement));
+		results_list->first->value = top_matching;
+		results_list->first->next = NULL;
+		results_list->last = results_list->first;
+		return results_list;
+	}
 	
 	char* top_matching_copy = (char*) malloc(sizeof (char) * n);
 	for(int i = 0; i < n; i++){
@@ -58,7 +80,6 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 	//test
 	
 	//aggiungo top matching ai risultati
-	struct ResultsList* results_list = (struct ResultsList*) malloc(sizeof (struct ResultsList));
 	results_list->first = (struct ResultsListElement*) malloc(sizeof (struct ResultsListElement));
 	for(int i = 0; i < n; i++){ //per non lavorare sul matching salvato tra i risultati
 		top_matching_copy[i] = top_matching[i];
