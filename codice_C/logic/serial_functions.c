@@ -233,6 +233,7 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 				while (men_preferences[m * n + k] != w) {
 					k++;
 				}
+				men_preferences_indexes[m]=k;
 				printf("Updated men_preferences_index[%i]=%i",m,k+1);
 				reversed_M[w] = m;
 				marking[w] = previous_woman;
@@ -251,12 +252,15 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 				reversed_M[w] = m1;
 				printf("\t\tformer_wife = %i\tw = %i\n",former_wife,w);
 				if (former_wife == w) { //3c: w = w'
+					printf("3c\n");
 					reversed_M[w] = m;
+
 					free(reversed_M);
 					free(old_reversed_M);
 					return; //al passo 1
 				} else {//3d
 					if (!accept_proposal(women_preferences, n, w, m, m1)) {
+						printf("qwerty\n");
 						marking[w] = old_marking;
 						previous_woman = w;
 						continue;//al passo 2
@@ -358,6 +362,7 @@ void build_graph(int n, struct RotationsList* rotations_list, char* top_matching
 	struct RotationNode** label_matrix = (struct RotationNode**)malloc(sizeof (struct RotationNode*) * n * n);
 	int* is_stable_matrix = (int*)malloc(sizeof (int) * n * n);
 	int* last_labelled_pair_index = (int*)malloc(sizeof (int) * n);
+	int* type_1_end = (int*)malloc(sizeof (int) * n);
 	int* applied_rotations = (int*)malloc(sizeof (int) * (rotations_list->last->value->index + 1));
 	struct RotationList* pair_list_element;
 	int man, woman,men_index, k, first_woman, next_woman;
@@ -378,6 +383,7 @@ void build_graph(int n, struct RotationsList* rotations_list, char* top_matching
 		printf("\n");
 		//last_labelled_pair_index[i]=n;
 		is_stable_matrix[top_matching[i]*n+i]=true;
+		type_1_end[i] = -1;
 	}
 	printf("\n");printf("\n");
 
@@ -425,6 +431,8 @@ void build_graph(int n, struct RotationsList* rotations_list, char* top_matching
 			is_stable_matrix[next_woman*n+man]=true;
 			last_labelled_pair_index[next_woman]=men_index;
 			label_matrix[woman*n+man]=rotations_list_element->value;
+			type_1_end[man]=next_woman;
+			printf("New type_1_end for %i: %i.\n",man,type_1_end[man]);
 			pair_list_element=pair_list_element->next;
 		}
 		printf("\n");
@@ -460,7 +468,12 @@ void build_graph(int n, struct RotationsList* rotations_list, char* top_matching
 		}
 		printf("k = %i\n",k);
 		p_star=NULL;
+		printf("Il type_1_end dell'uomo %i e' %i.\n",m,type_1_end[m]);
 		for(int j=k;j<n;j++){
+			if(type_1_end[m]==-1) {
+				printf("Breaking for man %i at woman %i.\n",m,men_preferences[m*n+j]);
+				break;
+			}
 			woman = men_preferences[m*n+j];
 			printf("\tm: %i, j: %i, woman: %i\t",m,j,woman);
 			if(label_matrix[woman*n+m]==NULL){
@@ -481,6 +494,7 @@ void build_graph(int n, struct RotationsList* rotations_list, char* top_matching
 				}
 				p_star=label_matrix[woman*n+m];//aggiunto questo
 				applied_rotations[label_matrix[woman*n+m]->index]=true;
+				if(type_1_end[m]==woman) break;
 			} else if(!applied_rotations[label_matrix[woman*n+m]->index]){//label di tipo 2
 				if(p_star==NULL) continue;
 				printf("Label di tipo 2\n");

@@ -22,10 +22,20 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 		}
 	}
 	if(only_one_matching){
+		for(int i=0;i<n;i++){
+			printf("%i\t",top_matching[i]);
+		}
+		printf("\n");
+		for(int i=0;i<n;i++){
+			printf("%i\t",bottom_matching[i]);
+		}
+		printf("\n");
+		printf("sono uguali!\n");
 		results_list->first = (struct ResultsListElement*) malloc(sizeof (struct ResultsListElement));
 		results_list->first->value = top_matching;
 		results_list->first->next = NULL;
 		results_list->last = results_list->first;
+		free(bottom_matching);
 		return results_list;
 	}
 	
@@ -39,9 +49,7 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 	printf("d\n");
 	//crea il grafo delle rotazioni
 	build_graph(n, rotations_list, top_matching, men_preferences, women_preferences);
-
 	//calcolo la lista delle rotazioni libere
-	//SBAGLIATO!!
 	struct RotationsList* free_rotations_list = (struct RotationsList*)malloc(sizeof (struct RotationsList));
 	free_rotations_list->first=NULL;
 	free_rotations_list->last=NULL;
@@ -107,6 +115,7 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 	
 	free(top_matching);
 	free_rotations_list_struct(rotations_list);
+	free(bottom_matching);
 	list_el=free_rotations_list->first;
 	struct RotationsListElement* temp;
 	while(list_el!=NULL){
