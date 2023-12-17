@@ -251,6 +251,13 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 				pause_breakmarriage(marking, M, reversed_M, old_reversed_M, rotations_list, w, previous_woman, rotation_index);
 				reversed_M[w] = m1;
 				printf("\t\tformer_wife = %i\tw = %i\n",former_wife,w);
+				
+				k = men_preferences_indexes[m]; //aggiorniamo indice
+				while (men_preferences[m * n + k] != w) {
+					k++;
+				}
+				men_preferences_indexes[m]=k;
+				
 				if (former_wife == w) { //3c: w = w'
 					printf("3c\n");
 					reversed_M[w] = m;
