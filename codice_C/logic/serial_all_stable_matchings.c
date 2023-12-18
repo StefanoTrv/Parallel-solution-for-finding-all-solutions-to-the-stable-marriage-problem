@@ -47,13 +47,26 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 	//crea la lista delle rotazioni
 	struct RotationsList* rotations_list = find_all_rotations(men_preferences, women_preferences, n, top_matching_copy);
 	printf("d\n");
+	struct RotationsListElement* list_el = rotations_list->first;
+	struct RotationList* t_el;
+	printf("%p != %p (NULL)\n",rotations_list->first->value, NULL);
+	while(list_el!=NULL){
+		printf("Rotazione %i:\t",list_el->value->index);
+		t_el=list_el->value->rotation;
+		while(t_el!=NULL){
+			printf("(%i, %i), ",t_el->man,t_el->woman);
+			t_el=t_el->next;
+		}
+		printf("\n");
+		list_el=list_el->next;
+	}
 	//crea il grafo delle rotazioni
 	build_graph(n, rotations_list, top_matching, men_preferences, women_preferences);
 	//calcolo la lista delle rotazioni libere
 	struct RotationsList* free_rotations_list = (struct RotationsList*)malloc(sizeof (struct RotationsList));
 	free_rotations_list->first=NULL;
 	free_rotations_list->last=NULL;
-	struct RotationsListElement* list_el = rotations_list->first;
+	list_el = rotations_list->first;
 	while(list_el!=NULL){
 		printf("list_el->value->missing_predecessors: %i\n",list_el->value->missing_predecessors);
 		if(list_el->value->missing_predecessors==0){

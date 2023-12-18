@@ -257,7 +257,7 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 					k++;
 				}
 				men_preferences_indexes[m]=k;
-				
+
 				if (former_wife == w) { //3c: w = w'
 					printf("3c\n");
 					reversed_M[w] = m;
@@ -368,29 +368,35 @@ void build_graph(int n, struct RotationsList* rotations_list, char* top_matching
 	struct RotationsListElement* rotations_list_element = rotations_list->first;
 	struct RotationNode** label_matrix = (struct RotationNode**)malloc(sizeof (struct RotationNode*) * n * n);
 	int* is_stable_matrix = (int*)malloc(sizeof (int) * n * n);
-	int* last_labelled_pair_index = (int*)malloc(sizeof (int) * n);
-	int* type_1_end = (int*)malloc(sizeof (int) * n);
+	int* label_second_condition = (int*)malloc(sizeof (int) * n * n);
+	int* last_labelled_woman_index = (int*)malloc(sizeof (int) * n);
+	int* last_labelled_man_index = (int*)malloc(sizeof (int) * n);
 	int* applied_rotations = (int*)malloc(sizeof (int) * (rotations_list->last->value->index + 1));
 	struct RotationList* pair_list_element;
-	int man, woman,men_index, k, first_woman, next_woman;
+	int man, woman,index, k, first_woman, next_woman;
 	struct RotationNode* p_star;
 	struct SuccessorsList* new_successor;
+	printf("%p != %p (NULL)\n",rotations_list->first->value, NULL);
 
 	for (int i=0; i<n; i++){
 		for(int j=0; j<n; j++){
 			label_matrix[i*n+j]=NULL;
 			is_stable_matrix[j*n+i]=false;
+			label_second_condition[j*n+i]=false;
 		}
 		woman = top_matching[i];
-		last_labelled_pair_index[woman]=n-1;
-		while(women_preferences[woman*n+last_labelled_pair_index[woman]]!=i){
-			printf("woman: %i, llp: %i\t",woman,last_labelled_pair_index[woman]);
-			last_labelled_pair_index[woman]--;
+		last_labelled_woman_index[woman]=n-1;
+		while(women_preferences[woman*n+last_labelled_woman_index[woman]]!=i){
+			printf("woman: %i, llw: %i\t",woman,last_labelled_woman_index[woman]);
+			last_labelled_woman_index[woman]--;
+		}
+		last_labelled_man_index[i]=0;
+		while(men_preferences[i*n+last_labelled_man_index[i]]!=woman){
+			printf("man: %i, llm: %i\t",i,last_labelled_man_index[i]);
+			last_labelled_man_index[i]++;
 		}
 		printf("\n");
-		//last_labelled_pair_index[i]=n;
 		is_stable_matrix[top_matching[i]*n+i]=true;
-		type_1_end[i] = -1;
 	}
 	printf("\n");printf("\n");
 
@@ -415,11 +421,14 @@ void build_graph(int n, struct RotationsList* rotations_list, char* top_matching
 		applied_rotations[i]=false;
 	}
 
+	printf("Inizio scrittura matrice etichette.\n");
+
 	while(rotations_list_element!=NULL){
 		printf("$");
 		pair_list_element = rotations_list_element->value->rotation;
 		first_woman=pair_list_element->woman;
 		while(pair_list_element!=NULL){
+			printf(".");
 			man=pair_list_element->man;
 			if(pair_list_element->next==NULL){
 				next_woman=first_woman;
@@ -427,19 +436,26 @@ void build_graph(int n, struct RotationsList* rotations_list, char* top_matching
 				next_woman=pair_list_element->next->woman;
 			}
 			woman=pair_list_element->woman;
-			printf("\n\tO - man: %i, woman: %i, next_woman: %i, last_labelled_pair-index: %i\n\t",man,woman,next_woman,last_labelled_pair_index[next_woman]-1);
-			men_index=last_labelled_pair_index[next_woman]-1;
-			while(women_preferences[next_woman*n+men_index]!=man){
-				printf("'(wp: %i, man: %i, men_index: %i)",women_preferences[next_woman*n+men_index],man,men_index);
-				//is_stable_matrix[next_woman*n+women_preferences[next_woman*n+men_index]]=false;
-				label_matrix[next_woman*n+women_preferences[next_woman*n+men_index]]=rotations_list_element->value;
-				men_index--;
+			printf("\n\tO - man: %i, woman: %i, next_woman: %i, last_labelled_woman_index: %i\n\t",man,woman,next_woman,last_labelled_woman_index[next_woman]-1);
+			//aggiorna rispetto alla donna
+			index=last_labelled_woman_index[next_woman]-1;
+			while(women_preferences[next_woman*n+index]!=man){
+				printf("'(wp: %i, man: %i, index: %i)",women_preferences[next_woman*n+index],man,index);
+				label_matrix[next_woman*n+women_preferences[next_woman*n+index]]=rotations_list_element->value;
+				index--;
 			}
+			last_labelled_woman_index[next_woman]=index;
+			//aggiorna rispetto all'uomo
+			index=last_labelled_man_index[man]+1;
+			while(men_preferences[man*n+index]!=next_woman){
+				printf("'(mp: %i, woman: %i, index: %i)",men_preferences[man*n+index],next_woman,index);
+				label_second_condition[man*n+men_preferences[man*n+index]]=true;
+				index++;
+			}
+			last_labelled_man_index[man]=index;
+
 			is_stable_matrix[next_woman*n+man]=true;
-			last_labelled_pair_index[next_woman]=men_index;
 			label_matrix[woman*n+man]=rotations_list_element->value;
-			type_1_end[man]=next_woman;
-			printf("New type_1_end for %i: %i.\n",man,type_1_end[man]);
 			pair_list_element=pair_list_element->next;
 		}
 		printf("\n");
@@ -475,12 +491,7 @@ void build_graph(int n, struct RotationsList* rotations_list, char* top_matching
 		}
 		printf("k = %i\n",k);
 		p_star=NULL;
-		printf("Il type_1_end dell'uomo %i e' %i.\n",m,type_1_end[m]);
 		for(int j=k;j<n;j++){
-			if(type_1_end[m]==-1) {
-				printf("Breaking for man %i at woman %i.\n",m,men_preferences[m*n+j]);
-				break;
-			}
 			woman = men_preferences[m*n+j];
 			printf("\tm: %i, j: %i, woman: %i\t",m,j,woman);
 			if(label_matrix[woman*n+m]==NULL){
@@ -501,9 +512,11 @@ void build_graph(int n, struct RotationsList* rotations_list, char* top_matching
 				}
 				p_star=label_matrix[woman*n+m];//aggiunto questo
 				applied_rotations[label_matrix[woman*n+m]->index]=true;
-				if(type_1_end[m]==woman) break;
-			} else if(!applied_rotations[label_matrix[woman*n+m]->index]){//label di tipo 2
-				if(p_star==NULL) continue;
+			} else if(!applied_rotations[label_matrix[woman*n+m]->index] && label_second_condition[m*n+woman]){//label di tipo 2
+				if(p_star==NULL) {
+					printf("WHAT???\n");
+					continue;
+				}
 				printf("Label di tipo 2\n");
 				printf("label_matrix[woman*n+m]->index: %i\tp->successors: %p\tNULL: %p\tlabel_matrix[woman*n+m]->missing_predecessors: %i\n",label_matrix[woman*n+m]->index,p_star->successors,NULL,label_matrix[woman*n+m]->missing_predecessors);
 				new_successor=(struct SuccessorsList*)malloc(sizeof (struct SuccessorsList));
@@ -532,8 +545,10 @@ void build_graph(int n, struct RotationsList* rotations_list, char* top_matching
 	}
 
 	free(label_matrix);
+	free(label_second_condition);
 	free(is_stable_matrix);
-	free(last_labelled_pair_index);
+	free(last_labelled_woman_index);
+	free(last_labelled_man_index);
 	free(applied_rotations);
 }
 
