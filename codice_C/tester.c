@@ -62,6 +62,7 @@ int main(int argc, char* argv[]) {
         }
 
         time = end_time-start_time;
+        fprintf(file, "%i\t%i\t%i\n", time, number_of_results, n);
 
         free(men_preferences);
         free(women_preferences);
