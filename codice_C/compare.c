@@ -126,7 +126,7 @@ void compare_solutions(int* men_preferences, int* women_preferences, int n, stru
     struct ResultsListElement* res_list_el = results->first;
     struct StablePermutationElement* stable_perms_list_el = stable_perms->first;
 
-    FILE* file_err_ptr = fopen("tester_automation_errors.txt", "w");
+    FILE* file_err_ptr = fopen("out_tester_compare_errors.txt", "w");
 
     while(stable_perms_list_el != NULL) {
         char* matching_res = res_list_el->value;
