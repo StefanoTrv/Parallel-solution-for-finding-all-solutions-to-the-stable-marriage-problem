@@ -25,7 +25,6 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     int seed, n, iterations;
-    printf("%i\n\n\n",argc);
     if(argc == 5){
         seed = strtol(argv[4], NULL, 10);
     } else {
@@ -51,14 +50,9 @@ int main(int argc, char* argv[]) {
         men_preferences = make_random_preferences(n);
         women_preferences = make_random_preferences(n);
 
-        printf("\n1\n");
-
         start_time = currentTimeMillis();
         results = all_stable_matchings(n, men_preferences, women_preferences);
-        printf("1.5\n");
         end_time = currentTimeMillis();
-
-        printf("2\n");
 
         number_of_results = 0;
         list_el = results->first;
@@ -68,7 +62,6 @@ int main(int argc, char* argv[]) {
         }
 
         time = end_time-start_time;
-        fprintf(file, "%i\t%i\t%i\n", time, number_of_results, n);
 
         free(men_preferences);
         free(women_preferences);

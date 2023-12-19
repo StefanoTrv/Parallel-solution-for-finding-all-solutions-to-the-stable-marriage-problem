@@ -34,9 +34,10 @@ int main(int argc, char* argv[]) {
     list_el = results->first;
     while(list_el!=NULL){
         for (int i = 0; i < n; i++) {
-            printf("%i ", list_el->value[i]);
+            printf("%i, ", list_el->value[i]);
             fprintf(out_ptr, "%i ", list_el->value[i]);
         }
+        printf("\n");
         fprintf(out_ptr, "\n");
         list_el=list_el->next;
     }
