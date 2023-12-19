@@ -364,6 +364,7 @@ void pause_breakmarriage(int* marking, int* M, int* reversed_M, int* old_reverse
 	return;
 }
 
+
 void build_graph(int n, struct RotationsList* rotations_list, int* top_matching, int* men_preferences, int* women_preferences){
 	struct RotationsListElement* rotations_list_element = rotations_list->first;
 	struct RotationNode** label_matrix = (struct RotationNode**)malloc(sizeof (struct RotationNode*) * n * n);

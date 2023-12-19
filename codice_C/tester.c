@@ -70,10 +70,6 @@ int main(int argc, char* argv[]) {
         time = end_time-start_time;
         fprintf(file, "%i\t%i\t%i\n", time, number_of_results, n);
 
-        /* CHECK PER CORRETTEZZA DELLA SOLUZIONE */
-        compare_solutions(men_preferences, women_preferences, n, results);
-
-
         free(men_preferences);
         free(women_preferences);
         free_results(results);

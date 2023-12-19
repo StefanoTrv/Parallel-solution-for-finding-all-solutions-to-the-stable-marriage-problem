@@ -126,8 +126,6 @@ void compare_solutions(int* men_preferences, int* women_preferences, int n, stru
     struct ResultsListElement* res_list_el = results->first;
     struct StablePermutationElement* stable_perms_list_el = stable_perms->first;
 
-    FILE* file_err_ptr = fopen("out_tester_compare_errors.txt", "w");
-
     while(stable_perms_list_el != NULL) {
         int* matching_res = res_list_el->value;
         int* matching_perm = stable_perms_list_el->value;
@@ -141,45 +139,44 @@ void compare_solutions(int* men_preferences, int* women_preferences, int n, stru
             } 
         }
         if (res_list_el == NULL) {
-            fprintf(file_err_ptr, "men_preferences:\n");
+            printf("men_preferences:\n");
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
-                    fprintf(file_err_ptr, "%i ", men_preferences[i * n + j]);
+                    printf("%i ", men_preferences[i * n + j]);
                 }
-                fprintf(file_err_ptr, "\n");
+                printf("\n");
             }
-            fprintf(file_err_ptr, "\nwomen_preferences:\n");
+            printf("\nwomen_preferences:\n");
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
-                    fprintf(file_err_ptr, "%i ", women_preferences[i * n + j]);
+                    printf("%i ", women_preferences[i * n + j]);
                 }
-                fprintf(file_err_ptr, "\n");
+                printf("\n");
             }
-            fprintf(file_err_ptr, "\nSoluzioni nostre:\n");
+            printf("\nOur solutions:\n");
             struct ResultsListElement* r = results->first;
             while (r != NULL) {
                 for (int i = 0; i < n; i++) {
-                    fprintf(file_err_ptr, "%i ", r->value[i]);
+                    printf("%i ", r->value[i]);
                 }
-                fprintf(file_err_ptr, "\n");
+                printf("\n");
                 r = r->next;
             }
-            fprintf(file_err_ptr, "\nSoluzioni naive:\n");
+            printf("\nNaive solutions:\n");
             struct StablePermutationElement* p = stable_perms->first;
             while (p != NULL) {
                 for (int i = 0; i < n; i++) {
-                    fprintf(file_err_ptr, "%i ", p->value[i]);
+                    printf("%i ", p->value[i]);
                 }
-                fprintf(file_err_ptr, "\n");
+                printf("\n");
                 p = p->next;
             }
-            fprintf(file_err_ptr, "\nNon e' stato trovato il matching ");
+            printf("\nError: Matching ");
             for (int i = 0; i < n; i++) {
-                fprintf(file_err_ptr, "%i ", matching_perm[i]);
+                printf("%i ", matching_perm[i]);
             }
-            fprintf(file_err_ptr, "nella lista di soluzioni del nostro algoritmo.\n");
-            fprintf(file_err_ptr, "------------------------------------------------\n");
-            fclose(file_err_ptr);
+            printf("not found in our solutions list.");
+            printf("\n\n------------------------------------------------\n\n");
             return;
         }
     }

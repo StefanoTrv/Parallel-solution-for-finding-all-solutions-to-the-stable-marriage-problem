@@ -9,4 +9,5 @@ void build_graph(int, struct RotationsList*, int*, int*, int*);
 void recursive_search(int*, int, struct RotationsListElement*, struct ResultsList*);
 
 struct ResultsList* all_stable_matchings(int n, int*, int*);
+
 #endif
