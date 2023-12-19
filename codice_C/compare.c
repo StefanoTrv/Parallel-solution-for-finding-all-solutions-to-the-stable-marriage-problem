@@ -129,7 +129,7 @@ void compare_solutions(int* men_preferences, int* women_preferences, int n, stru
     FILE* file_err_ptr = fopen("out_tester_compare_errors.txt", "w");
 
     while(stable_perms_list_el != NULL) {
-        char* matching_res = res_list_el->value;
+        int* matching_res = res_list_el->value;
         int* matching_perm = stable_perms_list_el->value;
         for (int i = 0; i < n; i++) {
             if (matching_res[i] != matching_perm[i]) {

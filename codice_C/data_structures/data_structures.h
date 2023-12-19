@@ -10,7 +10,7 @@ struct SuccessorsList;
 struct RotationsList;
 struct RotationsListElement;*/
 
-void appendResultsList(struct ResultsList*, char*);
+void appendResultsList(struct ResultsList*, int*);
 void appendRotationsList(struct RotationsList*, struct RotationNode*);
 
 #endif

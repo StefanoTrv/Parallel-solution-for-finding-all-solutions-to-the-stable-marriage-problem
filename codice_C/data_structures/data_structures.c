@@ -6,13 +6,13 @@ struct ResultsList {
 };
 
 struct ResultsListElement {
-	char* value;	//il matching
+	int* value;	//il matching
 	struct ResultsListElement* next;
 };
 
 struct RotationList { //list_el
-	char man;
-	char woman;
+	int man;
+	int woman;
 	struct RotationList* next;
 };
 
@@ -38,7 +38,7 @@ struct RotationsListElement { //free_rotations_list
 	struct RotationsListElement* next;
 };
 
-void appendResultsList(struct ResultsList* list, char* result){
+void appendResultsList(struct ResultsList* list, int* result){
 	struct ResultsListElement *new_el = (struct ResultsListElement*)malloc(sizeof (struct ResultsListElement));
 	new_el->value = result;
 	new_el->next = NULL;

@@ -4,16 +4,16 @@
 #define false 0
 #define true 1
 
-char* gale_shapley(int, int*, int*);
+int* gale_shapley(int, int*, int*);
 int accept_proposal(int*, int, int, int, int);
-struct RotationsList* find_all_rotations(int*, int*, int, char*);
-void breakmarriage(char*, int, int, int*, int*, int*, int*, struct RotationsList*, int*, int);
-void pause_breakmarriage(int*, char*, char*, char*, struct RotationsList*, int, int, int*);
-void build_graph(int, struct RotationsList*, char*, int*, int*);
-void recursive_search(char*, int, struct RotationsListElement*, struct ResultsList*);
+struct RotationsList* find_all_rotations(int*, int*, int, int*);
+void breakmarriage(int*, int, int, int*, int*, int*, int*, struct RotationsList*, int*, int);
+void pause_breakmarriage(int*, int*, int*, int*, struct RotationsList*, int, int, int*);
+void build_graph(int, struct RotationsList*, int*, int*, int*);
+void recursive_search(int*, int, struct RotationsListElement*, struct ResultsList*);
 
 
-char* gale_shapley(int n, int* men_preferences, int* women_preferences) {
+int* gale_shapley(int n, int* men_preferences, int* women_preferences) {
     int women_partners[n], men_free[n];
     for (int i = 0; i < n; i++) {
         women_partners[i] = -1;
@@ -51,8 +51,8 @@ char* gale_shapley(int n, int* men_preferences, int* women_preferences) {
             }
         }
     }
-    char* matching = (char*)malloc(n * sizeof(char));
-    for (char i = 0; i < n; i++) {
+    int* matching = (int*)malloc(n * sizeof(int));
+    for (int i = 0; i < n; i++) {
         matching[women_partners[i]] = i;
     }
     return matching;
@@ -75,7 +75,7 @@ int accept_proposal(int* women_preferences, int n, int w, int m, int m1) {
 }
 
 
-struct RotationsList* find_all_rotations(int* men_preferences, int* women_preferences, int n, char* top_matching) {
+struct RotationsList* find_all_rotations(int* men_preferences, int* women_preferences, int n, int* top_matching) {
 	printf("men_preferences:\n");
 	for (int i=0;i<n;i++){
 		for (int j=0;j<n;j++){
@@ -99,9 +99,9 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 	struct RotationsList* rotations_list = (struct RotationsList*) malloc(sizeof (struct RotationsList));
 	rotations_list->first = NULL;
 	rotations_list->last = NULL;
-	char* m_i = (char*) malloc(sizeof (char) * n);
-	char* inverted_bottom_matching = gale_shapley(n, women_preferences, men_preferences);
-	char* bottom_matching = (char*)malloc(sizeof (char) * n); //per avere il bottom matching dal pov degli uomini
+	int* m_i = (int*) malloc(sizeof (int) * n);
+	int* inverted_bottom_matching = gale_shapley(n, women_preferences, men_preferences);
+	int* bottom_matching = (int*)malloc(sizeof (int) * n); //per avere il bottom matching dal pov degli uomini
 	for(int i = 0; i < n; i++){
 		bottom_matching[inverted_bottom_matching[i]] = i;
 	}
@@ -152,7 +152,7 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 		printf("while di find_all_rotations::\tm = %i, w = %i",m,m_i[m]);
 		
 		//STEP 2
-		char w = m_i[m];
+		int w = m_i[m];
 		marking[w] = n;
 		printf("\t\t%i\n",w);
 		breakmarriage(m_i, m, n, men_preferences, men_preferences_indexes, women_preferences, marking, rotations_list, &rotation_index, w);
@@ -168,7 +168,7 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 }
 
 
-void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_preferences_indexes, int* women_preferences, int* marking,
+void breakmarriage(int* M, int m, int n, int* men_preferences, int* men_preferences_indexes, int* women_preferences, int* marking,
 				   struct RotationsList* rotations_list, int* rotation_index, int first_woman) {
 	printf("breakmarriage:\n");
 	for (int i=0;i<n;i++){
@@ -182,8 +182,8 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 	printf("\n");
 	int former_wife = M[m]; //il w dell'articolo, donna con cui l'uomo è accoppiato e si deve separare
 	int i;
-	char* reversed_M = (char*)malloc(sizeof (char) * n);
-	char* old_reversed_M = (char*)malloc(sizeof (char) * n);
+	int* reversed_M = (int*)malloc(sizeof (int) * n);
+	int* old_reversed_M = (int*)malloc(sizeof (int) * n);
 	for (i = 0; i < n; i++) {
 		reversed_M[M[i]] = i;
 		old_reversed_M[M[i]] = i;
@@ -291,7 +291,7 @@ void breakmarriage(char* M, int m, int n, int* men_preferences, int* men_prefere
 }
 
 
-void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reversed_M, struct RotationsList* rotations_list, int w, 
+void pause_breakmarriage(int* marking, int* M, int* reversed_M, int* old_reversed_M, struct RotationsList* rotations_list, int w, 
 					     int previous_woman, int* rotation_index) {
 	printf("pause_breakmarriage:\n");
 	for (int i=0;i<8;i++){
@@ -364,7 +364,7 @@ void pause_breakmarriage(int* marking, char* M, char* reversed_M, char* old_reve
 	return;
 }
 
-void build_graph(int n, struct RotationsList* rotations_list, char* top_matching, int* men_preferences, int* women_preferences){
+void build_graph(int n, struct RotationsList* rotations_list, int* top_matching, int* men_preferences, int* women_preferences){
 	struct RotationsListElement* rotations_list_element = rotations_list->first;
 	struct RotationNode** label_matrix = (struct RotationNode**)malloc(sizeof (struct RotationNode*) * n * n);
 	int* is_stable_matrix = (int*)malloc(sizeof (int) * n * n);
@@ -553,7 +553,7 @@ void build_graph(int n, struct RotationsList* rotations_list, char* top_matching
 }
 
 
-void recursive_search(char* matching, int n, struct RotationsListElement* free_rotations_list, struct ResultsList* results_list){
+void recursive_search(int* matching, int n, struct RotationsListElement* free_rotations_list, struct ResultsList* results_list){
 	struct RotationNode* successor;
 	struct RotationsListElement* new_list_el;
 	struct RotationsListElement* temp;
@@ -566,7 +566,7 @@ void recursive_search(char* matching, int n, struct RotationsListElement* free_r
 		//applica la rotazione
 		rotation = free_rotations_list->value->rotation;
 		
-		char first_woman = rotation->woman;
+		int first_woman = rotation->woman;
 		while(rotation->next != NULL){
 			matching[rotation->man] = rotation->next->woman;
 			rotation = rotation->next;
@@ -574,7 +574,7 @@ void recursive_search(char* matching, int n, struct RotationsListElement* free_r
 		matching[rotation->man] = first_woman;
 		
 		//aggiungo il matching ai risultati
-		char* new_matching = (char*)malloc(sizeof (char) * n);
+		int* new_matching = (int*)malloc(sizeof (int) * n);
 		for(int i = 0; i < n; i++){
 			new_matching[i] = matching[i];
 		}

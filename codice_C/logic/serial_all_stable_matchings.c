@@ -5,10 +5,10 @@
 struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women_preferences){
 	struct ResultsList* results_list = (struct ResultsList*) malloc(sizeof (struct ResultsList));
 	printf("a\n");
-	char* top_matching = gale_shapley(n,men_preferences,women_preferences);
+	int* top_matching = gale_shapley(n,men_preferences,women_preferences);
 	printf("b\n");
-	char* inverted_bottom_matching = gale_shapley(n, women_preferences, men_preferences);
-	char* bottom_matching = (char*)malloc(sizeof (char) * n);
+	int* inverted_bottom_matching = gale_shapley(n, women_preferences, men_preferences);
+	int* bottom_matching = (int*)malloc(sizeof (int) * n);
 
 	int only_one_matching=1;
 	for(int i = 0; i < n; i++){
@@ -39,7 +39,7 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 		return results_list;
 	}
 	
-	char* top_matching_copy = (char*) malloc(sizeof (char) * n);
+	int* top_matching_copy = (int*) malloc(sizeof (int) * n);
 	for(int i = 0; i < n; i++){
 		top_matching_copy[i] = top_matching[i];
 	}
