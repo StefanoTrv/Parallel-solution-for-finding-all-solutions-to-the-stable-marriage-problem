@@ -10,8 +10,8 @@ int main(int argc, char* argv[]) {
         printf("Usage: .\\tester.exe instances_dimension instances_number mode output_file <seed>");
         return 1;
     }
-    if (strcmp(argv[3], "classic") != 0 && strcmp(argv[3], "correctness") != 0) {
-        printf("Mode must be \"classic\" or \"correctness\"");
+    if (strcmp(argv[3], "classic") != 0 && strcmp(argv[3], "times") != 0) {
+        printf("Mode must be \"classic\" or \"times\"");
         return 1;
     }
     int seed, n, iterations;
@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
     int time_build_graph = 0; 
     int time_recursive_search = 0;
 
-    if (strcmp(argv[3], "correctness") == 0) {
+    if (strcmp(argv[3], "times") == 0) {
         fprintf(file, "Gale-Shapley\tFind All Rotations\tBuild Graph\tRecursive Search\n");
     }
 
@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
         men_preferences = make_random_preferences(n);
         women_preferences = make_random_preferences(n);
 
-        if (strcmp(argv[3], "correctness") == 0) {
+        if (strcmp(argv[3], "times") == 0) {
             results = all_stable_matchings_times(n, men_preferences, women_preferences, &time_gale_shapley, &time_find_all_rotations, &time_build_graph, &time_recursive_search);
             fprintf(file, "%i\t\t\t\t%i\t\t\t\t\t%i\t\t\t%i\n", time_gale_shapley, time_find_all_rotations, time_build_graph, time_recursive_search);
         } else {
