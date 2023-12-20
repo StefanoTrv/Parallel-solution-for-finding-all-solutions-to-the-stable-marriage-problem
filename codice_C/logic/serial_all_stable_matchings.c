@@ -1,5 +1,6 @@
 #include "..\data_structures\data_structures.h"
 #include <stdlib.h>
+#include <sys/time.h>
 #include "..\utilities\utilities.h"
 
 /**
