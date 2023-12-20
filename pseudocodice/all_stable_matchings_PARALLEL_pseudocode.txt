@@ -1,11 +1,15 @@
-//FIND_ALL_ROTATIONS modificato in modo da tornare anche una lista di tutte le rotazioni
+Codice lato host
+//FIND_ALL_ROTATIONS modificato in modo da tornare anche una lista di tutte
+    le rotazioni
 
 ALL_STABLE_MATCHINGS(n, men_preferences, women_preferences):
 	top_matching = GALE_SHAPLEY(n, men_preferences, women_preferences)
 	
 	//crea il grafo delle rotazioni
-	free_rotations_list, all_rotations_list = FIND_ALL_ROTATIONS(men_preferences, women_preferences, n)
-	//free_rotations_list è la lista dei nodi liberi, cioè i nodi del grafo che non hanno predecessori
+	free_rotations_list, all_rotations_list = FIND_ALL_ROTATIONS(
+                    men_preferences, women_preferences, n)
+	//free_rotations_list e' la lista dei nodi liberi, cioe' i nodi del
+          grafo che non hanno predecessori
 	
 	mem_list = NEW_LIST()
 	t_mem = NEW_MEM_EL()
@@ -21,19 +25,26 @@ ALL_STABLE_MATCHINGS(n, men_preferences, women_preferences):
 		dim++
 	missing_predecessors[] = int[dim]
 	for r in all_rotations_list:
-		missing_predecessors[r.value.index]=r.value.missing_predecessors
+		missing_predecessors[r.value.index]=
+                    r.value.missing_predecessors
 	
-	PARALLEL_RECURSIVE_SEARCH(top_matching,n,free_rotations_list,mem_list,missing_predecessors,dim)
+	PARALLEL_RECURSIVE_SEARCH(top_matching,n,free_rotations_list,
+                                        mem_list,missing_predecessors,dim)
 	
 	//compatta memoria
 	
 	return [...] //ritorna i risultati compattati
 	
-PARALLEL_RECURSIVE_SEARCH(matching,n,free_rotations_list,mem_list,missing_predecessors,remaining_rotations):
-	if IS_MEMORY_REQUIRED_BY_GRID_TOO_BIG(remaining_rotations,[...]: //basato sulle proprietà del device e parametri passati al momemento del lancio
+PARALLEL_RECURSIVE_SEARCH(matching,n,free_rotations_list,mem_list,
+            missing_predecessors,remaining_rotations):
+	if IS_MEMORY_REQUIRED_BY_GRID_TOO_BIG(remaining_rotations,[...]:
+        //basato sulle proprieta' del device e parametri passati al
+            momento del lancio
 	
 		//chiamata ricorsiva non applicando la prima rotazione
-		PARALLEL_RECURSIVE_SEARCH(matching,n,free_rotations_list.next,mem_list,missing_predecessors,remaining_rotations-1)
+		PARALLEL_RECURSIVE_SEARCH(matching,n,
+                free_rotations_list.next,mem_list,missing_predecessors,
+                remaining_rotations-1)
 		
 		//applica la rotazione
 		rotation_node = free_rotations_list.value
@@ -61,12 +72,16 @@ PARALLEL_RECURSIVE_SEARCH(matching,n,free_rotations_list,mem_list,missing_predec
 				//aggiungi questa rotazione in cima lista
 				new_free_rotations_list = NEW_LIST_ELEMENT()
 				new_free_rotations_list.value = successor
-				new_free_rotations_list.next = free_rotations_list.next
+				new_free_rotations_list.next = 
+                                    free_rotations_list.next
 		
 		//chiamata ricorsiva applicando la prima rotazione
-		PARALLEL_RECURSIVE_SEARCH(matching,n,new_free_rotations_list,mem_list,missing_predecessors,remaining_rotations-1)
+		PARALLEL_RECURSIVE_SEARCH(matching,n,
+                    new_free_rotations_list,mem_list,
+                    missing_predecessors,remaining_rotations-1)
 		
-		//se necessario, deallocare primo elemento di new_free_rotations_list
+		//se necessario, deallocare primo elemento
+                    di new_free_rotations_list
 		
 		//ripristino i missing_predecessors dei successori
 		for successor in free_rotations_list.value.successors:
@@ -90,7 +105,10 @@ PARALLEL_RECURSIVE_SEARCH(matching,n,free_rotations_list,mem_list,missing_predec
 			grid_dimension *= 2
 		grid_dimension -= 1 //togliamo il matching di partenza
 		
-		-> Lancio sincrono di grid_dimension kernel con i dati matching, n, free_rotations_list, missing_predecessors, grid_dimension, allocando lo spazio in memoria per i risultati (si usa l'upper bound per la dimensione)
+		-> Lancio sincrono di grid_dimension kernel con i dati
+                matching, n, free_rotations_list, missing_predecessors,
+                grid_dimension, allocando lo spazio in memoria per i
+                risultati (si usa l'upper bound per la dimensione)
 		
 		results_dim = COPY_AN_INTEGER_FROM_DEVICE_RESULTS()
 		
@@ -104,13 +122,21 @@ PARALLEL_RECURSIVE_SEARCH(matching,n,free_rotations_list,mem_list,missing_predec
 		mem_list.append(t_mem)
 		mem_list.append(new_matching)
 		
+Codice lato device
 //CODICE DEVICE
-//ogni KERNEL ha la propria copia indipendente di matching e missing_predecessors, il resto è condiviso con il resto della grid
-*int results //zona in memoria per i risultati, condivisa da grid e grid figlie
-*int memory_pointer //condivisa in tutta la grid (non nelle grid figlie però)
-KERNEL(matching, n, free_rotations_list, missing_predecessors, grid_dimension):
+//ogni KERNEL ha la propria copia indipendente di matching e
+missing_predecessors, il resto e' condiviso con il resto della grid
+*int results //zona in memoria per i risultati, 
+                condivisa da grid e grid figlie
+*int memory_pointer //condivisa in tutta la grid
+                (non nelle grid figlie pero')
+KERNEL(matching, n, free_rotations_list,
+            missing_predecessors, grid_dimension):
 	if this_thread.index == 0:
-		memory_pointer = ATOMIC_FETCH_AND_INCREASE(results,grid_dimension * n * size_of (int)) //prende il puntatore al primo punto libero nella memoria dei risultati e poi lo incrementa di grid_dimension, in modo atomico
+		memory_pointer = ATOMIC_FETCH_AND_INCREASE(results,
+                grid_dimension * n * size_of (int)) //prende il puntatore al
+                    primo punto libero nella memoria dei risultati e poi lo
+                    incrementa di grid_dimension, in modo atomico
 	SYNCRONIZE_GRID()
 	int bitmap = this_thread.index + 1
 	int i = 0
@@ -123,23 +149,33 @@ KERNEL(matching, n, free_rotations_list, missing_predecessors, grid_dimension):
 			rotation = r.value
 			first_woman = rotation.value[1]
 			while rotation.next!=NULL:
-				matching[rotation.value[0]]=rotation.next.value[1]
+				matching[rotation.value[0]]=
+                        rotation.next.value[1]
 				rotation = rotation.next
 			matching[rotation.value[0]]=first_woman
-			//aggiorna missing_predecessors e costruisce la nuova lista delle rotazioni libere
+			//aggiorna missing_predecessors e costruisce la
+                    nuova lista delle rotazioni libere
 			for successor in rotation_node.successors:
 				missing_predecessors[successor.index] -= 1
 				if missing_predecessors[successor.index] == 0:
-					//aggiungi questa rotazione in cima lista
-					t_new_free_rotations_list = NEW_LIST_ELEMENT()
-					t_new_free_rotations_list.value = successor
-					t_new_free_rotations_list.next = new_free_rotations_list
-					new_free_rotations_list = t_new_free_rotations_list
+					//aggiungi questa rotazione in cima
+                                        alla lista
+					t_new_free_rotations_list =
+                            NEW_LIST_ELEMENT()
+					t_new_free_rotations_list.value = 
+                            successor
+					t_new_free_rotations_list.next = 
+                            new_free_rotations_list
+					new_free_rotations_list = 
+                            t_new_free_rotations_list
 					number_of_new_exposed_rotations++
-	MEM_COPY(matching, memory_pointer + this_thread.index * size_of (int) * n)
+	MEM_COPY(matching,
+            memory_pointer + this_thread.index * size_of (int) * n)
 	new_grid_dimension = 1
 	for i=0; i<number_of_new_exposed_rotations; i++:
 		new_grid_dimension *= 2
 	new_grid_dimension -= 1 //togliamo il matching appena calcolato
 	if new_grid_dimension > 0: 
-		-> Lancia new_grid_dimension nuovi kernel, con i dati matching, n, new_free_rotations_list, missing_predecessors, new_grid_dimension
+		-> Lancia new_grid_dimension nuovi kernel, con i dati
+                matching, n, new_free_rotations_list, missing_predecessors,
+                new_grid_dimension

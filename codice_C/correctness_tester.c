@@ -5,7 +5,6 @@
 #include "utilities\utilities.h"
 #include "compare.h"
 
-
 int main(int argc, char* argv[]) {
     if (argc != 3 && argc != 4) {
         printf("Usage: .\\tester.exe instances_dimension instances_number <seed>");
