@@ -2,9 +2,29 @@
 #include <stdlib.h>
 #include "..\utilities\utilities.h"
 
-struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women_preferences){
+/**
+* @brief provide same output with the native function in java called
+* currentTimeMillis().
+*/
+int64_t currentTimeMillis() {
+  struct timeval time;
+  gettimeofday(&time, NULL);
+  int64_t s1 = (int64_t)(time.tv_sec) * 1000;
+  int64_t s2 = (time.tv_usec / 1000);
+  return s1 + s2;
+}
+
+struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women_preferences, int* time_gale_shapley, int* time_find_all_rotations, int* time_build_graph, int* time_recursive){
+	uint64_t start_time;
+    uint64_t end_time;
+    
 	struct ResultsList* results_list = (struct ResultsList*) malloc(sizeof (struct ResultsList));
+	
+	start_time = currentTimeMillis();
 	int* top_matching = gale_shapley(n,men_preferences,women_preferences);
+	end_time = currentTimeMillis();
+	*time_gale_shapley = end_time - start_time;	
+
 	int* inverted_bottom_matching = gale_shapley(n, women_preferences, men_preferences);
 	int* bottom_matching = (int*)malloc(sizeof (int) * n);
 	for(int i = 0; i < n; i++){
@@ -36,10 +56,16 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 	}
 
 	//crea la lista delle rotazioni
+	start_time = currentTimeMillis();
 	struct RotationsList* rotations_list = find_all_rotations(men_preferences, women_preferences, n, top_matching_copy);
-	
+	end_time = currentTimeMillis();
+	*time_find_all_rotations = end_time - start_time;
+
 	//crea il grafo delle rotazioni
+	start_time = currentTimeMillis();
 	build_graph(n, rotations_list, top_matching, men_preferences, women_preferences);
+	end_time = currentTimeMillis();
+	*time_build_graph = end_time - start_time;
 
 	//calcolo la lista delle rotazioni libere
 	struct RotationsList* free_rotations_list = (struct RotationsList*)malloc(sizeof (struct RotationsList));
@@ -63,7 +89,10 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 	results_list->last = results_list->first;
 
 	if(rotations_list->first != NULL){
+		start_time = currentTimeMillis();	
 		recursive_search(top_matching, n, free_rotations_list->first, results_list);
+		end_time = currentTimeMillis();
+		*time_recursive = end_time - start_time;
 	}
 	
 	free(top_matching);

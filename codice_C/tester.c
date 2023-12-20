@@ -6,10 +6,9 @@
 #include "utilities\utilities.h"
 #include "compare.h"
 
-/**
+/*
 * @brief provide same output with the native function in java called
 * currentTimeMillis().
-*/
 int64_t currentTimeMillis() {
   struct timeval time;
   gettimeofday(&time, NULL);
@@ -17,7 +16,7 @@ int64_t currentTimeMillis() {
   int64_t s2 = (time.tv_usec / 1000);
   return s1 + s2;
 }
-
+*/
 
 int main(int argc, char* argv[]) {
     if (argc != 4 && argc!=5) {
@@ -46,13 +45,25 @@ int main(int argc, char* argv[]) {
     uint64_t end_time;
     struct ResultsList* results;
     struct ResultsListElement* list_el;
+
+    int time_gale_shapley = 0; 
+    int time_find_all_rotations = 0; 
+    int time_build_graph = 0; 
+    int time_recursive_search = 0;
+    FILE* mt_ptr = fopen("out_tempi_medi_algoritmi.txt", "w");
+    fprintf(mt_ptr, "Gale-Shapley\tFind All Rotations\tBuild Graph\tRecursive Search\n");
+
+
     for(int i =0; i<iterations;i++){
         men_preferences = make_random_preferences(n);
         women_preferences = make_random_preferences(n);
 
         start_time = currentTimeMillis();
-        results = all_stable_matchings(n, men_preferences, women_preferences);
+        results = all_stable_matchings(n, men_preferences, women_preferences, &time_gale_shapley, &time_find_all_rotations, &time_build_graph, &time_recursive_search);
         end_time = currentTimeMillis();
+
+        fprintf(mt_ptr, "%i\t\t\t\t%i\t\t\t\t\t%i\t\t\t%i\n", time_gale_shapley, time_find_all_rotations, time_build_graph, time_recursive_search);
+
 
         number_of_results = 0;
         list_el = results->first;
@@ -70,6 +81,7 @@ int main(int argc, char* argv[]) {
         printf("\nCompleted test %i of %i",i+1,iterations);
     }
 
+    fclose(mt_ptr);
     fclose(file);
     return 0;
 }
