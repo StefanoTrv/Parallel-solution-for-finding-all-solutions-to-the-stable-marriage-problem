@@ -40,12 +40,12 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 			break;
 		}
 	}
-	free(bottom_matching);
 	if(only_one_matching){
 		results_list->first = (struct ResultsListElement*) malloc(sizeof (struct ResultsListElement));
 		results_list->first->value = top_matching;
 		results_list->first->next = NULL;
 		results_list->last = results_list->first;
+		free(bottom_matching);
 		return results_list;
 	}
 	
@@ -57,10 +57,11 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 
 	//crea la lista delle rotazioni
 	start_time = currentTimeMillis();
-	struct RotationsList* rotations_list = find_all_rotations(men_preferences, women_preferences, n, top_matching_copy);
+	struct RotationsList* rotations_list = find_all_rotations(men_preferences, women_preferences, n, top_matching_copy,bottom_matching);
+	free(bottom_matching);
 	end_time = currentTimeMillis();
 	*time_find_all_rotations = end_time - start_time;
-
+	
 	//crea il grafo delle rotazioni
 	start_time = currentTimeMillis();
 	build_graph(n, rotations_list, top_matching, men_preferences, women_preferences);

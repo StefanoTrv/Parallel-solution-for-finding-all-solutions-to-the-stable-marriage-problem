@@ -6,7 +6,7 @@
 
 int* gale_shapley(int, int*, int*);
 int accept_proposal(int*, int, int, int, int);
-struct RotationsList* find_all_rotations(int*, int*, int, int*);
+struct RotationsList* find_all_rotations(int*, int*, int, int*, int*);
 void breakmarriage(int*, int, int, int*, int*, int*, int*, struct RotationsList*, int*, int);
 void pause_breakmarriage(int*, int*, int*, int*, struct RotationsList*, int, int, int*);
 void build_graph(int, struct RotationsList*, int*, int*, int*);
@@ -73,16 +73,11 @@ int accept_proposal(int* women_preferences, int n, int w, int m, int m1) {
 }
 
 
-struct RotationsList* find_all_rotations(int* men_preferences, int* women_preferences, int n, int* top_matching) {
+struct RotationsList* find_all_rotations(int* men_preferences, int* women_preferences, int n, int* top_matching, int* bottom_matching) {
 	struct RotationsList* rotations_list = (struct RotationsList*) malloc(sizeof (struct RotationsList));
 	rotations_list->first = NULL;
 	rotations_list->last = NULL;
 	int* m_i = (int*) malloc(sizeof (int) * n);
-	int* inverted_bottom_matching = gale_shapley(n, women_preferences, men_preferences);
-	int* bottom_matching = (int*)malloc(sizeof (int) * n); //per avere il bottom matching dal punto di vista degli uomini
-	for(int i = 0; i < n; i++){
-		bottom_matching[inverted_bottom_matching[i]] = i;
-	}
 	
 	int* marking = (int*) malloc(sizeof (int) * n); //-1 unmarked, n marked ma non associata, altri sono la donna precedente
 	int rotation_index = 0; //per indicizzare le rotationi
@@ -127,8 +122,6 @@ struct RotationsList* find_all_rotations(int* men_preferences, int* women_prefer
 	free(m_i);
 	free(marking);
 	free(men_preferences_indexes);
-	free(inverted_bottom_matching);
-	free(bottom_matching);
 	return rotations_list;
 }
 

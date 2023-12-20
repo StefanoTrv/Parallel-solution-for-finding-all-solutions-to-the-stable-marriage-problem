@@ -36,9 +36,6 @@ int main(int argc, char* argv[]) {
         free(men_preferences);
         free(women_preferences);
         free_results(results);
-        if (i == 0) {
-            return;
-        }
         printf("\nCompleted test %i of %i", i+1, iterations);
     }
 
