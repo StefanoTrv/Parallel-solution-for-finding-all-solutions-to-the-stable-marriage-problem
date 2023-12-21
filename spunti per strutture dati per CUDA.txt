@@ -1,0 +1,17 @@
+Risultati in matrice triangolare inferiore con dim |rotazioni|, con significato: i è predecessore di j (o inverso).
+Poi, in modo seriale, si scansiona la matrice e si aggiornano i nodi delle rotazioni.
+Pagelocked? Mapped?
+
+Input: sufficiente passare solo la lista della rotazioni e non il nodo: ordinandole secondo il loro indice, non è necessario passare il nodo (che contiene l'indice). Le liste delle rotazioni vengono messe contiguamente nello stesso vettore (la prima metà contiene gli uomini e la seconda le donne, per avere accessi allineati alla memoria globale). Sono necessari anche il numero totale di rotazioni e un vettore con il dispacement, che indica dove finisce nel vettore la lista della rotazione di ogni rotazione (il primo inizia da 0, quindi non serve specificare l'inizio).
+Rotazioni come costante e displacement in shared (o anch'esso costante)? Probabilmente entrambi come streaming memory, perché acceduti una sola volta.
+
+La formula per indicizzare la matrice triangolare inferiore è (y-1)*y/2+x con il significato di "y dipende da x?".
+Esempio (B sta per booleano, cioè T o F):
+
+1. B
+2. B B
+3. B B B
+4. B B B B
+5. B B B B B
+6. B B B B B B
+   0 1 2 3 4 5
