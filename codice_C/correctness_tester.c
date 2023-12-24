@@ -7,16 +7,16 @@
 
 int main(int argc, char* argv[]) {
     if (argc != 3 && argc != 4) {
-        printf("Usage: .\\tester.exe instances_dimension instances_number <seed>");
+        printf("Usage: .\\correctness_tester.exe instances_dimension instances_number <seed>");
         return 1;
     }
     int seed, n, iterations;
     if(argc == 4){
-        seed = strtol(argv[4], NULL, 10);
+        seed = strtol(argv[3], NULL, 10);
     } else {
         seed = 42;
     }
-    
+
     srand(seed);
     n = strtol(argv[1], NULL, 10);
     iterations = strtol(argv[2], NULL, 10);
@@ -25,13 +25,14 @@ int main(int argc, char* argv[]) {
     int* women_preferences;
     struct ResultsList* results;
     struct ResultsListElement* list_el;
+
     for(int i = 0; i < iterations; i++) {
         men_preferences = make_random_preferences(n);
         women_preferences = make_random_preferences(n);
 
         results = all_stable_matchings(n, men_preferences, women_preferences);
         compare_solutions(men_preferences, women_preferences, n, results);
-
+        
         free(men_preferences);
         free(women_preferences);
         free_results(results);
