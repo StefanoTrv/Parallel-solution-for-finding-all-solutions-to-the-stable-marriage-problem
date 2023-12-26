@@ -2,6 +2,7 @@
 #define SERIAL_FUNCTIONS
 #include "serial_functions.c"
 #include "serial_all_stable_matchings.c"
+#include "CUDA_all_stable_matchings.cu"
 
 int* gale_shapley(int, int*, int*);
 struct RotationsList* find_all_rotations(int*, int*, int, int*, int*);

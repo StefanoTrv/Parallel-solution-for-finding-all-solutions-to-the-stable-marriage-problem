@@ -53,6 +53,7 @@ dkms.conf
 
 #File di vscode
 .vscode/*
+.vs/*
 
 #File di output
 codice_c/out.txt

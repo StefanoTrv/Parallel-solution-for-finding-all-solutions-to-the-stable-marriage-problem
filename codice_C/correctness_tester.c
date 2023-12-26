@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <stdint.h>
-#include "logic\serial_functions.h"
 #include "data_structures\data_structures.h"
 #include "utilities\utilities.h"
 #include "compare.h"
