@@ -2,8 +2,15 @@ Risultati in matrice triangolare inferiore con dim |rotazioni|, con significato:
 Poi, in modo seriale, si scansiona la matrice e si aggiornano i nodi delle rotazioni.
 Pagelocked? Mapped?
 
-Input: sufficiente passare solo la lista della rotazioni e non il nodo: ordinandole secondo il loro indice, non è necessario passare il nodo (che contiene l'indice). Le liste delle rotazioni vengono messe contiguamente nello stesso vettore (la prima metà contiene gli uomini e la seconda le donne, per avere accessi allineati alla memoria globale). Sono necessari anche il numero totale di rotazioni e un vettore con il dispacement, che indica dove finisce nel vettore la lista della rotazione di ogni rotazione (il primo inizia da 0, quindi non serve specificare l'inizio).
+Sicuramente page-locked (non userei la write-combined visto che l'host deve leggere i risultati di build-graph). Probabilmente anche mapped per evitare
+di effettuare copie di un blocco sia lato host che lato device. Ma è da verificare.
+
+Input: sufficiente passare solo la lista della rotazioni e non il nodo: ordinandole secondo il loro indice, non è necessario passare il nodo (che contiene l'indice). 
+Le liste delle rotazioni vengono messe contiguamente nello stesso vettore (la prima metà contiene gli uomini e la seconda le donne, per avere accessi allineati alla memoria globale). 
+Sono necessari anche il numero totale di rotazioni e un vettore con il dispacement, che indica dove finisce nel vettore la lista della rotazione di ogni rotazione (il primo inizia da 0, quindi non serve specificare l'inizio).
 Rotazioni come costante e displacement in shared (o anch'esso costante)? Probabilmente entrambi come streaming memory, perché acceduti una sola volta.
+
+Dimensione memoria costante: 64KB per compute capability > 7.x (entrambe le nostre schede sono > 7).
 
 La formula per indicizzare la matrice triangolare inferiore è (y-1)*y/2+x con il significato di "y dipende da x?".
 Esempio (B sta per booleano, cioè T o F):

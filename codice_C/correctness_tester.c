@@ -1,5 +1,7 @@
+#include <stdio.h>
 #include "data_structures\data_structures.h"
 #include "utilities\utilities.h"
+#include "logic\serial_functions.h"
 #include "compare.h"
 
 int main(int argc, char* argv[]) {
