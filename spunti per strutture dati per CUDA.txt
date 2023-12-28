@@ -1,4 +1,4 @@
-Risultati in matrice triangolare inferiore con dim |rotazioni|, con significato: i è predecessore di j (o inverso).
+Risultati in matrice triangolare inferiore con dim |rotazioni|, con significato: i è predecessore di j.
 Poi, in modo seriale, si scansiona la matrice e si aggiornano i nodi delle rotazioni.
 Pagelocked? Mapped?
 

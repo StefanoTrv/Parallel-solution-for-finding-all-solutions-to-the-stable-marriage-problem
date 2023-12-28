@@ -77,23 +77,24 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	struct RotationNode** rotation_vector = (struct RotationNode**)malloc(sizeof (struct RotationNode*) * number_of_rotations); //per velocizzare il salvataggio dei risultati
 
 	list_el = rotations_list->first;
-	int c;
+	int c1,c2;
 	while(list_el!=NULL){
-		c = 0;
+		c1 = 0;
 		rotation_vector[list_el->value->index]=list_el->value;//riempio rotation_vector
 		rotation_el=list_el->value->rotation;
 		while(rotation_el!=NULL){//salva tutte le coppie
-			rotations_vector[c]=rotation_el->man;
-			rotations_vector[total_number_of_pairs+c]=rotation_el->woman;
-			c++;
+			rotations_vector[c1]=rotation_el->man;
+			rotations_vector[total_number_of_pairs+c1]=rotation_el->woman;
+			c1++;
 			rotation_el=rotation_el->next;
 		}
-		end_displacement_vector[list_el->value->index]; //il displacement di questa rotazione
+		c2+=c1-1;
+		end_displacement_vector[list_el->value->index]=c2; //il displacement di questa rotazione
 		list_el=list_el->next;
 	}
 
 	//lancio dei kernel
-	int* triangular_matrix = 1234567890;
+	int* triangular_matrix = (int*)malloc(sizeof (int) * ((n-1)*n)/2);//da cambiare tipo di malloc
 	build_graph(n, rotations_list, top_matching, men_preferences, women_preferences);
 
 	//applico i risultati alle strutture dati dell'host

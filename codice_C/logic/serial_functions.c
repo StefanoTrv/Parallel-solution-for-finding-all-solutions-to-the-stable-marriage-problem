@@ -346,10 +346,9 @@ void build_graph(int n, struct RotationsList* rotations_list, int* top_matching,
 		//resettare applied_rotations
 		for(int j=k;j<n;j++){
 			woman=men_preferences[m*n+j];
-			if(label_matrix[woman*n+m]==NULL){
-				continue;
+			if(label_matrix[woman*n+m]!=NULL){
+				applied_rotations[label_matrix[woman*n+m]->index]=false;
 			}
-			applied_rotations[label_matrix[woman*n+m]->index]=false;		
 		}
 	}
 
