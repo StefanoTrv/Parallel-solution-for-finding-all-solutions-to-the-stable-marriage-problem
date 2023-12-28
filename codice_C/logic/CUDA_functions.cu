@@ -48,7 +48,7 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int* rotations_
 	for (i=threadIdx.x;i<iterations;i+=blockDim.x){
 		if(i<number_of_rotations){
 			if(i==0){
-				j==0;
+				j=0;
 			}else{
 				j=end_displacement_vector[i-1]+1;
 			}

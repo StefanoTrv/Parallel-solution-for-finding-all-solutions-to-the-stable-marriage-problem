@@ -108,11 +108,12 @@ void generate_permutations(int* men_preferences, int* women_preferences, struct 
 
 
 void all_permutations(int* men_preferences, int* women_preferences, int n, struct StablePermutations* stable_perms) {
-    int array[n];
+    int* array = (int*) malloc(sizeof(int) * n);
     for (int i = 0; i < n; i++) {
         array[i] = i;
     }
     generate_permutations(men_preferences, women_preferences, stable_perms, array, 0, n);
+    free(array);
 }
 
 

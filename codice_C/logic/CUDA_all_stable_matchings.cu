@@ -1,20 +1,12 @@
 #include <stdlib.h>
-//#include <sys/time.h>
+#include <chrono>
 #include <stdint.h>
 #include "..\utilities\utilities.h"
 #include "..\data_structures\data_structures.h"
 
-/**
-* @brief provide same output with the native function in java called
-* currentTimeMillis().
-*/
-/*int64_t currentTimeMillis() {
-  struct timeval time;
-  gettimeofday(&time, NULL);
-  int64_t s1 = (int64_t)(time.tv_sec) * 1000;
-  int64_t s2 = (time.tv_usec / 1000);
-  return s1 + s2;
-}*/
+
+#define min(i, j) (((i) < (j)) ? (i) : (j))
+#define max(i, j) (((i) > (j)) ? (i) : (j))
 
 
 struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* women_preferences){
@@ -93,9 +85,23 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 		list_el=list_el->next;
 	}
 
-	//lancio dei kernel
-	int* triangular_matrix = (int*)malloc(sizeof (int) * ((n-1)*n)/2);//da cambiare tipo di malloc
-	build_graph(n, rotations_list, top_matching, men_preferences, women_preferences);
+	//Alloco memoria page-locked sull'host
+	int* triangular_matrix;
+	cudaHostAlloc((void**)&triangular_matrix, sizeof (int) * ((n-1)*n)/2, cudaHostAllocDefault); //da vedere se passare a mapped
+	
+	//Sposto i dati su device
+	void* dev_ptr = triangular_matrix; 
+	cudaMemcpy(dev_ptr, triangular_matrix, sizeof (int) * ((n-1)*n)/2, cudaMemcpyHostToDevice);
+
+	//lancio del kernel
+	int NumThPerBlock = min(max(number_of_rotations, n), 1024);
+	build_graph_CUDA<<<1, NumThPerBlock>>>(n, number_of_rotations, rotations_vector, end_displacement_vector,  top_matching, women_preferences, men_preferences, dev_ptr);
+	
+	//Sposto i risultati sull'host
+	cudaMemcpy(triangular_matrix, dev_ptr, sizeof (int) * ((n-1)*n)/2, cudaMemcpyDeviceToHost);
+
+	//libero la memoria sul device
+	cudaFree(dev_ptr);
 
 	//applico i risultati alle strutture dati dell'host
 	list_el = rotations_list->first;
@@ -117,6 +123,7 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	}
 
 	//libero memoria
+	cudaFreeHost(triangular_matrix);
 	free(rotations_vector);
 	free(end_displacement_vector);
 	free(rotation_vector);
@@ -163,16 +170,18 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 }
 
 
-/*struct ResultsList* all_stable_matchings_times(int n, int* men_preferences, int* women_preferences, int* time_gale_shapley, int* time_find_all_rotations, int* time_build_graph, int* time_recursive){
-	uint64_t start_time;
-    uint64_t end_time;
-    
+
+/*struct ResultsList* all_stable_matchings_times_CUDA(int n, int* men_preferences, int* women_preferences, int* time_gale_shapley, int* time_find_all_rotations, int* time_build_graph, int* time_recursive){
+	// Time measure
+    std::chrono::steady_clock::time_point start_time;
+    std::chrono::steady_clock::time_point end_time;
+
 	struct ResultsList* results_list = (struct ResultsList*) malloc(sizeof (struct ResultsList));
 	
-	start_time = currentTimeMillis();
+	start_time = std::chrono::steady_clock::now();
 	int* top_matching = gale_shapley(n,men_preferences,women_preferences);
-	end_time = currentTimeMillis();
-	*time_gale_shapley = end_time - start_time;	
+	end_time = std::chrono::steady_clock::now();
+	*time_gale_shapley = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
 
 	int* inverted_bottom_matching = gale_shapley(n, women_preferences, men_preferences);
 	int* bottom_matching = (int*)malloc(sizeof (int) * n);
@@ -205,17 +214,18 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	}
 
 	//crea la lista delle rotazioni
-	start_time = currentTimeMillis();
+	start_time = std::chrono::steady_clock::now();
 	struct RotationsList* rotations_list = find_all_rotations(men_preferences, women_preferences, n, top_matching_copy,bottom_matching);
 	free(bottom_matching);
-	end_time = currentTimeMillis();
-	*time_find_all_rotations = end_time - start_time;
+	end_time = std::chrono::steady_clock::now();
+	*time_find_all_rotations = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+
 	
 	//crea il grafo delle rotazioni
-	start_time = currentTimeMillis();
+	start_time = std::chrono::steady_clock::now();
 	build_graph(n, rotations_list, top_matching, men_preferences, women_preferences);
-	end_time = currentTimeMillis();
-	*time_build_graph = end_time - start_time;
+	end_time = std::chrono::steady_clock::now();
+	*time_build_graph = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
 
 	//calcolo la lista delle rotazioni libere
 	struct RotationsList* free_rotations_list = (struct RotationsList*)malloc(sizeof (struct RotationsList));
@@ -239,10 +249,10 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	results_list->last = results_list->first;
 
 	if(rotations_list->first != NULL){
-		start_time = currentTimeMillis();	
+		start_time = std::chrono::steady_clock::now();
 		recursive_search(top_matching, n, free_rotations_list->first, results_list);
-		end_time = currentTimeMillis();
-		*time_recursive = end_time - start_time;
+		end_time = std::chrono::steady_clock::now();
+		*time_recursive = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
 	}
 	
 	free(top_matching);
