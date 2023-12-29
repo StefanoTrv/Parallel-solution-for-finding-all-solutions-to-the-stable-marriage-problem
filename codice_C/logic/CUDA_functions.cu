@@ -14,7 +14,6 @@ __device__ int* applied_rotations;
 
 __global__ void build_graph_CUDA(int n, int number_of_rotations, int* rotations_vector, int* end_displacement_vector, int* top_matching, int* women_preferences, int* men_preferences, int* triangular_matrix){
 	int woman, i, j, first_woman, man, next_woman, k, p_star, iterations;
-
 	if(threadIdx.x==0){
 		label_matrix = (int*)malloc(sizeof (int) * n * n);
 		is_stable_matrix = (int*)malloc(sizeof (int) * n * n);
@@ -49,7 +48,7 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int* rotations_
 	__syncwarp();
 
 	iterations = number_of_rotations/blockDim.x + ((number_of_rotations%blockDim.x < 1) ? 0 : 1);
-	for (i=threadIdx.x;i<iterations;i+=blockDim.x){
+	for (i=threadIdx.x;i<iterations*blockDim.x;i+=blockDim.x){
 		if(i<number_of_rotations){
 			if(i==0){
 				j=0;
@@ -90,7 +89,7 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int* rotations_
 	__syncthreads();
 
 	iterations = n/blockDim.x + ((n%blockDim.x < 1) ? 0 : 1);
-	for(man=threadIdx.x;man<iterations;man+=blockDim.x){
+	for(man=threadIdx.x;man<iterations*blockDim.x;man+=blockDim.x){
 		if(man<n){
 			k=0;
 			while(top_matching[man]!=men_preferences[man*n+k]){
