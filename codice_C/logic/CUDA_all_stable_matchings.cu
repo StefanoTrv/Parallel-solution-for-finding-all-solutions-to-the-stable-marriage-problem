@@ -9,6 +9,16 @@
 #define max(i, j) (((i) > (j)) ? (i) : (j))
 
 
+static void HandleError( cudaError_t err, const char *file, int line ) {
+	if (err != cudaSuccess) {
+		printf( "%s in %s at line %d\n", cudaGetErrorString( err ), file, line );
+		exit( EXIT_FAILURE );
+	}
+}
+
+#define HANDLE_ERROR( err ) (HandleError( err, __FILE__, __LINE__ ))
+
+
 struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* women_preferences){
 	struct ResultsList* results_list = (struct ResultsList*) malloc(sizeof (struct ResultsList));
 	int* top_matching = gale_shapley(n,men_preferences,women_preferences);
@@ -48,6 +58,8 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	
 	//crea il grafo delle rotazioni
 
+	printf("INIZIO");
+
 	//SEZIONE PARALLELIZZATA
 	//creazione delle strutture dati di input
 	int number_of_rotations = 0;
@@ -65,9 +77,9 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	}
 
 	int* rotations_vector;
-	cudaHostAlloc((void**)&rotations_vector, sizeof (int) * total_number_of_pairs * 2, cudaHostAllocMapped);
+	HANDLE_ERROR(cudaHostAlloc((void**)&rotations_vector, sizeof (int) * total_number_of_pairs * 2, cudaHostAllocMapped));
 	int* end_displacement_vector;
-	cudaHostAlloc((void**)&end_displacement_vector, sizeof (int) * number_of_rotations, cudaHostAllocMapped);
+	HANDLE_ERROR(cudaHostAlloc((void**)&end_displacement_vector, sizeof (int) * number_of_rotations, cudaHostAllocMapped));
 	struct RotationNode** rotation_vector = (struct RotationNode**)malloc(sizeof (struct RotationNode*) * number_of_rotations); //per velocizzare il salvataggio dei risultati
 
 	list_el = rotations_list->first;
@@ -91,28 +103,35 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	//preparazione per il lancio del kernel
 	int* triangular_matrix, *dev_triangular_matrix, *dev_rotations_vector, *dev_end_displacement_vector, *dev_top_matching, *dev_men_preferences, *dev_women_preferences; 
 
-	cudaHostAlloc((void**)&triangular_matrix, sizeof (int) * ((n-1)*n)/2, cudaHostAllocMapped);
+	HANDLE_ERROR(cudaHostAlloc((void**)&triangular_matrix, sizeof (int) * ((n-1)*n)/2, cudaHostAllocMapped));
 	
-	cudaHostGetDevicePointer(&dev_triangular_matrix, triangular_matrix, 0);
-	cudaHostGetDevicePointer(&dev_rotations_vector, rotations_vector, 0);
-	cudaHostGetDevicePointer(&dev_end_displacement_vector, end_displacement_vector, 0);
+	HANDLE_ERROR(cudaHostGetDevicePointer(&dev_triangular_matrix, triangular_matrix, 0));
+	HANDLE_ERROR(cudaHostGetDevicePointer(&dev_rotations_vector, rotations_vector, 0));
+	HANDLE_ERROR(cudaHostGetDevicePointer(&dev_end_displacement_vector, end_displacement_vector, 0));
 
-	cudaMalloc((void**)&dev_top_matching, sizeof(int) * n);
-	cudaMalloc((void**)&dev_men_preferences, sizeof(int) * n * n);
-	cudaMalloc((void**)&dev_women_preferences, sizeof(int) * n * n);
+	HANDLE_ERROR(cudaMalloc((void**)&dev_top_matching, sizeof(int) * n));
+	HANDLE_ERROR(cudaMalloc((void**)&dev_men_preferences, sizeof(int) * n * n));
+	HANDLE_ERROR(cudaMalloc((void**)&dev_women_preferences, sizeof(int) * n * n));
 
-	cudaMemcpy(dev_top_matching, top_matching, sizeof(int) * n, cudaMemcpyHostToDevice);
-	cudaMemcpy(dev_men_preferences, men_preferences, sizeof(int) * n * n, cudaMemcpyHostToDevice);
-	cudaMemcpy(dev_women_preferences, women_preferences, sizeof(int) * n * n, cudaMemcpyHostToDevice);
+	HANDLE_ERROR(cudaMemcpy(dev_top_matching, top_matching, sizeof(int) * n, cudaMemcpyHostToDevice));
+	HANDLE_ERROR(cudaMemcpy(dev_men_preferences, men_preferences, sizeof(int) * n * n, cudaMemcpyHostToDevice));
+	HANDLE_ERROR(cudaMemcpy(dev_women_preferences, women_preferences, sizeof(int) * n * n, cudaMemcpyHostToDevice));
 
+	printf("\nprima del lancio del kernel\n");
 	//lancio del kernel
 	int NumThPerBlock = min(max(number_of_rotations, n), 1024);
 	build_graph_CUDA<<<1, NumThPerBlock>>>(n, number_of_rotations, dev_rotations_vector, dev_end_displacement_vector,  dev_top_matching, dev_women_preferences, dev_men_preferences, dev_triangular_matrix);
-	
+	printf("\ndopo del lancio del kernel\n");
+
 	//libero memoria
-	cudaFree(dev_top_matching);
-	cudaFree(dev_men_preferences);
-	cudaFree(dev_women_preferences);
+	HANDLE_ERROR(cudaFree(dev_top_matching));
+	printf("\nprima liberazione\n");
+	HANDLE_ERROR(cudaFree(dev_men_preferences));
+	printf("\nseconda liberazione\n");
+	HANDLE_ERROR(cudaFree(dev_women_preferences));
+	printf("\nterza liberazione\n");
+
+	printf("\ndopo la liberazione della memoria\n");
 
 	//applico i risultati alle strutture dati dell'host
 	list_el = rotations_list->first;
@@ -121,6 +140,7 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	while(list_el!=NULL){
 		y=list_el->value->index;
 		for(int x = 0; x<y; x++){
+			printf("x: %i   y: %i\n", x, y);
 			if(triangular_matrix[((y-1)*y)/2+x]){//se y dipende da x
 				list_el->value->missing_predecessors++;//incremento il numero di predecessori di y
 				//e aggiungo y tra i successori di x
@@ -134,13 +154,13 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	}
 
 	//libero memoria
-	cudaFreeHost(triangular_matrix);
-	cudaFreeHost(rotations_vector);
-	cudaFreeHost(end_displacement_vector);
+	HANDLE_ERROR(cudaFreeHost(triangular_matrix));
+	HANDLE_ERROR(cudaFreeHost(rotations_vector));
+	HANDLE_ERROR(cudaFreeHost(end_displacement_vector));
 	free(rotation_vector);
 
 	//FINE SEZIONE PARALLELIZZATA
-
+	printf("FINE");
 	
 	//calcolo la lista delle rotazioni libere
 	struct RotationsList* free_rotations_list = (struct RotationsList*)malloc(sizeof (struct RotationsList));
