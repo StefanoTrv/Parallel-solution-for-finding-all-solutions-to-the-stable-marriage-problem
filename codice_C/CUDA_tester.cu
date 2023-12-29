@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "logic\parallel_functions.h"
+#include "logic\parallel_functions.cuh"
 #include "data_structures\data_structures.h"
 #include "utilities\utilities.h"
 #include "compare.h"
@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
         women_preferences = make_random_preferences(n);
 
         if (strcmp(argv[3], "times") == 0) {
-            results = all_stable_matchings_times_CUDA(n, men_preferences, women_preferences, &time_gale_shapley, &time_find_all_rotations, &time_build_graph, &time_recursive_search);
+            //results = all_stable_matchings_times_CUDA(n, men_preferences, women_preferences, &time_gale_shapley, &time_find_all_rotations, &time_build_graph, &time_recursive_search);
         } else {
             // Time measure
             std::chrono::steady_clock::time_point start_time;
