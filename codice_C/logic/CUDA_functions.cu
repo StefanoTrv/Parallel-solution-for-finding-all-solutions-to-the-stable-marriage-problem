@@ -7,13 +7,12 @@
 
 __global__ void build_graph_CUDA(int, int, int*, int*, int*, int*, int*, int*);
 
+__device__ int* label_matrix;
+__device__ int* is_stable_matrix;
+__device__ int* label_second_condition;
+__device__ int* applied_rotations;
 
 __global__ void build_graph_CUDA(int n, int number_of_rotations, int* rotations_vector, int* end_displacement_vector, int* top_matching, int* women_preferences, int* men_preferences, int* triangular_matrix){
-	__shared__ int* label_matrix; //da vedere se ci sono problemi con dimensioni grandi o se non si raggiungono o vengono gestiti da soli
-	__shared__ int* is_stable_matrix;
-	__shared__ int* label_second_condition;
-	__shared__ int* applied_rotations;
-
 	int woman, i, j, first_woman, man, next_woman, k, p_star, iterations;
 
 	if(threadIdx.x==0){
@@ -121,6 +120,7 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int* rotations_
 		}
 		__syncwarp();
 	}
+	__syncthreads();
 	
 	if(threadIdx.x==0){
 		free(label_matrix);
