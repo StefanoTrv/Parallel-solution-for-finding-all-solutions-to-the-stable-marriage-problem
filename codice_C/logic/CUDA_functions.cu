@@ -43,6 +43,11 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int* rotations_
 	}
 	__syncwarp();
 
+	for (i = threadIdx.x; i < ((n-1)*n)/2; i+=blockDim.x) {
+		triangular_matrix[i] = false;
+	}
+	__syncwarp();
+
 	iterations = number_of_rotations/blockDim.x + ((number_of_rotations%blockDim.x < 1) ? 0 : 1);
 	for (i=threadIdx.x;i<iterations;i+=blockDim.x){
 		if(i<number_of_rotations){

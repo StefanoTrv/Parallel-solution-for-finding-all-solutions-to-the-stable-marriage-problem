@@ -64,12 +64,15 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 		list_el=list_el->next;
 	}
 
-	int* rotations_vector = (int*)malloc(sizeof (int) * total_number_of_pairs * 2);
-	int* end_displacement_vector = (int*)malloc(sizeof (int) * number_of_rotations);
+	int* rotations_vector;
+	cudaHostAlloc((void**)&rotations_vector, sizeof (int) * total_number_of_pairs * 2, cudaHostAllocMapped);
+	int* end_displacement_vector;
+	cudaHostAlloc((void**)&end_displacement_vector, sizeof (int) * number_of_rotations, cudaHostAllocMapped);
 	struct RotationNode** rotation_vector = (struct RotationNode**)malloc(sizeof (struct RotationNode*) * number_of_rotations); //per velocizzare il salvataggio dei risultati
 
 	list_el = rotations_list->first;
 	int c1,c2;
+	c2 = 0;
 	while(list_el!=NULL){
 		c1 = 0;
 		rotation_vector[list_el->value->index]=list_el->value;//riempio rotation_vector
@@ -85,23 +88,31 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 		list_el=list_el->next;
 	}
 
-	//Alloco memoria page-locked sull'host
-	int* triangular_matrix;
-	cudaHostAlloc((void**)&triangular_matrix, sizeof (int) * ((n-1)*n)/2, cudaHostAllocDefault); //da vedere se passare a mapped
+	//preparazione per il lancio del kernel
+	int* triangular_matrix, *dev_triangular_matrix, *dev_rotations_vector, *dev_end_displacement_vector, *dev_top_matching, *dev_men_preferences, *dev_women_preferences; 
+
+	cudaHostAlloc((void**)&triangular_matrix, sizeof (int) * ((n-1)*n)/2, cudaHostAllocMapped);
 	
-	//Sposto i dati su device
-	void* dev_ptr = triangular_matrix; 
-	cudaMemcpy(dev_ptr, triangular_matrix, sizeof (int) * ((n-1)*n)/2, cudaMemcpyHostToDevice);
+	cudaHostGetDevicePointer(&dev_triangular_matrix, triangular_matrix, 0);
+	cudaHostGetDevicePointer(&dev_rotations_vector, rotations_vector, 0);
+	cudaHostGetDevicePointer(&dev_end_displacement_vector, end_displacement_vector, 0);
+
+	cudaMalloc((void**)&dev_top_matching, sizeof(int) * n);
+	cudaMalloc((void**)&dev_men_preferences, sizeof(int) * n * n);
+	cudaMalloc((void**)&dev_women_preferences, sizeof(int) * n * n);
+
+	cudaMemcpy(dev_top_matching, top_matching, sizeof(int) * n, cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_men_preferences, men_preferences, sizeof(int) * n * n, cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_women_preferences, women_preferences, sizeof(int) * n * n, cudaMemcpyHostToDevice);
 
 	//lancio del kernel
 	int NumThPerBlock = min(max(number_of_rotations, n), 1024);
-	build_graph_CUDA<<<1, NumThPerBlock>>>(n, number_of_rotations, rotations_vector, end_displacement_vector,  top_matching, women_preferences, men_preferences, dev_ptr);
+	build_graph_CUDA<<<1, NumThPerBlock>>>(n, number_of_rotations, dev_rotations_vector, dev_end_displacement_vector,  dev_top_matching, dev_women_preferences, dev_men_preferences, dev_triangular_matrix);
 	
-	//Sposto i risultati sull'host
-	cudaMemcpy(triangular_matrix, dev_ptr, sizeof (int) * ((n-1)*n)/2, cudaMemcpyDeviceToHost);
-
-	//libero la memoria sul device
-	cudaFree(dev_ptr);
+	//libero memoria
+	cudaFree(dev_top_matching);
+	cudaFree(dev_men_preferences);
+	cudaFree(dev_women_preferences);
 
 	//applico i risultati alle strutture dati dell'host
 	list_el = rotations_list->first;
@@ -124,8 +135,8 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 
 	//libero memoria
 	cudaFreeHost(triangular_matrix);
-	free(rotations_vector);
-	free(end_displacement_vector);
+	cudaFreeHost(rotations_vector);
+	cudaFreeHost(end_displacement_vector);
 	free(rotation_vector);
 
 	//FINE SEZIONE PARALLELIZZATA
