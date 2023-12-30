@@ -18,7 +18,7 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int* rotations_
 		label_matrix = (int*)malloc(sizeof (int) * n * n);
 		is_stable_matrix = (int*)malloc(sizeof (int) * n * n);
 		label_second_condition = (int*)malloc(sizeof (int) * n * n);
-		applied_rotations = (int*)malloc(sizeof (int) * number_of_rotations);
+		applied_rotations = (int*)malloc(sizeof (int) * number_of_rotations * n);
 	}
 	__syncthreads();
 
@@ -38,12 +38,15 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int* rotations_
 	__syncwarp();
 
 	for (i=threadIdx.x;i<number_of_rotations;i+=blockDim.x){
-		applied_rotations[i]=false;
+		for(j=0;j<n;j++){
+			applied_rotations[j*n+i]=false;
+		}
 	}
 	__syncwarp();
 
 	for (i = threadIdx.x; i < ((n-1)*n)/2; i+=blockDim.x) {
 		triangular_matrix[i] = false;
+		//printf("%i ",triangular_matrix[i]);
 	}
 	__syncwarp();
 
@@ -55,6 +58,9 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int* rotations_
 			}else{
 				j=end_displacement_vector[i-1]+1;
 			}
+			printf("\nThread: %i\ti: %i\tj: %i",threadIdx.x,i,j);
+		} else {
+			printf("\nThread: %i\ti: %i\tNON ESEGUITO",threadIdx.x,i);
 		}
 		__syncwarp();
 		if(i<number_of_rotations){
@@ -71,17 +77,20 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int* rotations_
 				k=n-1;
 				while(women_preferences[next_woman*n+k]!=man){
 					atomicMin(label_matrix + (next_woman*n+women_preferences[next_woman*n+k]),i);// => label_matrix[next_woman*n+women_preferences[next_woman*n+k]]=i;
+					printf("\nlabel_matrix[%i] = %i",next_woman*n+women_preferences[next_woman*n+k],label_matrix[next_woman*n+women_preferences[next_woman*n+k]]);
 					k--;
 				}
 				//aggiorna rispetto all'uomo
 				k=0;
 				while(men_preferences[man*n+k]!=next_woman){
 					label_second_condition[man*n+men_preferences[man*n+k]]=true;
+					printf("\nlabel_second_condition[%i] = %i",man*n+men_preferences[man*n+k],label_second_condition[man*n+men_preferences[man*n+k]]);
 					k++;
 				}
 
 				is_stable_matrix[next_woman*n+man]=true;
 				atomicMin(label_matrix + (woman*n+man),i);// => label_matrix[woman*n+man]=i;
+				printf("\nlabel_matrix[%i] = %i",(woman*n+man),label_matrix[(woman*n+man)]);
 			}
 		}
 		__syncwarp();
@@ -95,6 +104,9 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int* rotations_
 			while(top_matching[man]!=men_preferences[man*n+k]){
 				k++;
 			}
+			//printf("\n2. Thread: %i\tman: %i\tk: %i\tm_p[]: %i",threadIdx.x,man,k,men_preferences[man*n+k]);
+		} else {
+			//printf("\n2. Thread: %i\tman: %i\tNON ESEGUITO",threadIdx.x,man);
 		}
 		__syncwarp();
 		if(man<n){
@@ -105,21 +117,15 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int* rotations_
 				if(is_stable_matrix[woman*n+man]){//label di tipo 1
 					if(p_star!=-1){
 						triangular_matrix[((p_star-1)*p_star)/2+label_matrix[woman*n+man]]=true;
+						printf("triangular_matrix[%i] = %i ",((p_star-1)*p_star)/2+label_matrix[woman*n+man],triangular_matrix[((p_star-1)*p_star)/2+label_matrix[woman*n+man]]);
 					}
 					p_star=label_matrix[woman*n+man];
-					applied_rotations[label_matrix[woman*n+man]]=true;
-				} else if(!applied_rotations[label_matrix[woman*n+man]] && label_second_condition[man*n+woman]){//label di tipo 2
+					applied_rotations[man*n+label_matrix[woman*n+man]]=true;
+				} else if(!applied_rotations[man*n+label_matrix[woman*n+man]] && label_second_condition[man*n+woman]){//label di tipo 2
 					triangular_matrix[((label_matrix[woman*n+man]-1)*label_matrix[woman*n+man])/2+p_star]=true;
-					applied_rotations[label_matrix[woman*n+man]]=true;
+					printf("triangular_matrix[%i] = %i ",((label_matrix[woman*n+man]-1)*label_matrix[woman*n+man])/2+p_star,triangular_matrix[((label_matrix[woman*n+man]-1)*label_matrix[woman*n+man])/2+p_star]);
+					applied_rotations[man*n+label_matrix[woman*n+man]]=true;
 				}
-			}
-		}
-		__syncwarp();
-		//resettare applied_rotations
-		if(man<n){
-			for(j=k;j<n;j++){
-				woman=men_preferences[man*n+j];
-				applied_rotations[label_matrix[woman*n+man]]=false;
 			}
 		}
 		__syncwarp();

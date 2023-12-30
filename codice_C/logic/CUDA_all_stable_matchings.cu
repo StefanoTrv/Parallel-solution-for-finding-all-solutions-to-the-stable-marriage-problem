@@ -99,7 +99,6 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 		end_displacement_vector[list_el->value->index]=c2; //il displacement di questa rotazione
 		list_el=list_el->next;
 	}
-
 	//preparazione per il lancio del kernel
 	int* triangular_matrix, *dev_triangular_matrix, *dev_rotations_vector, *dev_end_displacement_vector, *dev_top_matching, *dev_men_preferences, *dev_women_preferences; 
 
@@ -140,7 +139,7 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	while(list_el!=NULL){
 		y=list_el->value->index;
 		for(int x = 0; x<y; x++){
-			printf("x: %i   y: %i\n", x, y);
+			//printf("x: %i   y: %i\n", x, y);
 			if(triangular_matrix[((y-1)*y)/2+x]){//se y dipende da x
 				list_el->value->missing_predecessors++;//incremento il numero di predecessori di y
 				//e aggiungo y tra i successori di x
@@ -160,8 +159,9 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	free(rotation_vector);
 
 	//FINE SEZIONE PARALLELIZZATA
-	printf("FINE");
-	
+	printf("\nFINE");
+
+	printf("\nCalcolo lista rotazioni libere");
 	//calcolo la lista delle rotazioni libere
 	struct RotationsList* free_rotations_list = (struct RotationsList*)malloc(sizeof (struct RotationsList));
 	free_rotations_list->first=NULL;
@@ -174,6 +174,7 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 		list_el=list_el->next;
 	}
 	
+	printf("\nAggiungo top matching ai risultati");
 	//aggiungo top matching ai risultati
 	results_list->first = (struct ResultsListElement*) malloc(sizeof (struct ResultsListElement));
 	for(int i = 0; i < n; i++){ //per non lavorare sul matching salvato tra i risultati
@@ -182,11 +183,13 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	results_list->first->value = top_matching_copy;
 	results_list->first->next = NULL;
 	results_list->last = results_list->first;
-
+	
+	printf("\nRicerca ricorsiva dei risultati");
 	if(rotations_list->first != NULL){
 		recursive_search(top_matching, n, free_rotations_list->first, results_list);
 	}
-	
+		
+	printf("\nUltimi free");
 	free(top_matching);
 	free_rotations_list_struct(rotations_list);
 	list_el=free_rotations_list->first;
