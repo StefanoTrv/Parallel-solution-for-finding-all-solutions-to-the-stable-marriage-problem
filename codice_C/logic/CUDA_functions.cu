@@ -5,14 +5,14 @@
 #define true 1
 
 
-__global__ void build_graph_CUDA(int, int, int*, int*, int*, int*, int*, int*);
+__global__ void build_graph_CUDA(int, int, int, int*, int*, int*, int*, int*, int*);
 
 __device__ int* label_matrix;
 __device__ int* is_stable_matrix;
 __device__ int* label_second_condition;
 __device__ int* applied_rotations;
 
-__global__ void build_graph_CUDA(int n, int number_of_rotations, int* rotations_vector, int* end_displacement_vector, int* top_matching, int* women_preferences, int* men_preferences, int* triangular_matrix){
+__global__ void build_graph_CUDA(int n, int number_of_rotations, int total_number_of_pairs, int* rotations_vector, int* end_displacement_vector, int* top_matching, int* women_preferences, int* men_preferences, int* triangular_matrix){
 	int woman, i, j, first_woman, man, next_woman, k, p_star, iterations;
 	if(threadIdx.x==0){
 		label_matrix = (int*)malloc(sizeof (int) * n * n);
@@ -64,31 +64,33 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int* rotations_
 		}
 		__syncwarp();
 		if(i<number_of_rotations){
-			first_woman=rotations_vector[number_of_rotations+j];
+			first_woman=rotations_vector[total_number_of_pairs+j];
 			for(;j<=end_displacement_vector[i];j++){
 				man=rotations_vector[j];
 				if(j==end_displacement_vector[i]){
 					next_woman=first_woman;
 				}else{
-					next_woman=rotations_vector[number_of_rotations+j+1];
+					next_woman=rotations_vector[total_number_of_pairs+j+1];
 				}
-				woman=rotations_vector[number_of_rotations+j];
+				woman=rotations_vector[total_number_of_pairs+j];
+				printf("\nCoppia della rotazione %i: (%i,%i).\t(i=%i, j=%i, w_index=%i)",i,man,woman,i,j,total_number_of_pairs+j);
 				//aggiorna rispetto alla donna
 				k=n-1;
 				while(women_preferences[next_woman*n+k]!=man){
 					atomicMin(label_matrix + (next_woman*n+women_preferences[next_woman*n+k]),i);// => label_matrix[next_woman*n+women_preferences[next_woman*n+k]]=i;
-					printf("\nlabel_matrix[%i] = %i",next_woman*n+women_preferences[next_woman*n+k],label_matrix[next_woman*n+women_preferences[next_woman*n+k]]);
+					printf("\nlabel_matrix[%i] = %i\t(type 2)",next_woman*n+women_preferences[next_woman*n+k],label_matrix[next_woman*n+women_preferences[next_woman*n+k]]);
 					k--;
 				}
 				//aggiorna rispetto all'uomo
 				k=0;
 				while(men_preferences[man*n+k]!=next_woman){
 					label_second_condition[man*n+men_preferences[man*n+k]]=true;
-					printf("\nlabel_second_condition[%i] = %i",man*n+men_preferences[man*n+k],label_second_condition[man*n+men_preferences[man*n+k]]);
+					printf("\nlabel_second_condition[%i] = %i\t(type 1)",man*n+men_preferences[man*n+k],label_second_condition[man*n+men_preferences[man*n+k]]);
 					k++;
 				}
 
 				is_stable_matrix[next_woman*n+man]=true;
+				printf("\nLa coppia uomo %i e donna %i e' stabile.",man, woman);
 				atomicMin(label_matrix + (woman*n+man),i);// => label_matrix[woman*n+man]=i;
 				printf("\nlabel_matrix[%i] = %i",(woman*n+man),label_matrix[(woman*n+man)]);
 			}
@@ -96,6 +98,24 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int* rotations_
 		__syncwarp();
 	}
 	__syncthreads();
+	if(threadIdx.x==0){
+		printf("\nLABEL_MATRIX:\n");
+		for(i=0;i<n;i++){
+			for(j=0; j<n; j++){
+				printf("%i\t",label_matrix[i*n+j]);
+			}
+			printf("\n");
+		}
+	}
+	if(threadIdx.x==0){
+		printf("\nIS STABLE MATRIX:\n");
+		for(i=0;i<n;i++){
+			for(j=0; j<n; j++){
+				printf("%i\t",is_stable_matrix[i*n+j]);
+			}
+			printf("\n");
+		}
+	}
 
 	iterations = n/blockDim.x + ((n%blockDim.x < 1) ? 0 : 1);
 	for(man=threadIdx.x;man<iterations*blockDim.x;man+=blockDim.x){
@@ -133,6 +153,13 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int* rotations_
 	__syncthreads();
 	
 	if(threadIdx.x==0){
+		printf("\nLABEL_MATRIX:\n");
+		for(i=0;i<n;i++){
+			for(j=0; j<n; j++){
+				printf("%i\t",label_matrix[i*n+j]);
+			}
+			printf("\n");
+		}
 		free(label_matrix);
 		free(is_stable_matrix);
 		free(label_second_condition);

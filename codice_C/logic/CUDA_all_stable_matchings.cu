@@ -83,22 +83,36 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	struct RotationNode** rotation_vector = (struct RotationNode**)malloc(sizeof (struct RotationNode*) * number_of_rotations); //per velocizzare il salvataggio dei risultati
 
 	list_el = rotations_list->first;
-	int c1,c2;
-	c2 = 0;
+	int c1 = 0;
+	int c2 = 0;
 	while(list_el!=NULL){
-		c1 = 0;
 		rotation_vector[list_el->value->index]=list_el->value;//riempio rotation_vector
 		rotation_el=list_el->value->rotation;
 		while(rotation_el!=NULL){//salva tutte le coppie
+			printf("\nSto selezionando la coppia: %i %i\t\tc1=%i",rotation_el->man,rotation_el->woman,c1);
 			rotations_vector[c1]=rotation_el->man;
 			rotations_vector[total_number_of_pairs+c1]=rotation_el->woman;
 			c1++;
 			rotation_el=rotation_el->next;
 		}
-		c2+=c1-1;
+		c2=c1-1;
 		end_displacement_vector[list_el->value->index]=c2; //il displacement di questa rotazione
 		list_el=list_el->next;
 	}
+
+	///test
+	printf("\nVettore delle rotazioni:\n");
+	for(int i=0;i<total_number_of_pairs;i++){
+		printf("(%i,%i)",rotations_vector[i],rotations_vector[total_number_of_pairs+i]);
+	}
+	printf("\n");
+	printf("\nVettore dei displacement:\n");
+	for(int i=0;i<number_of_rotations;i++){
+		printf("%i ",end_displacement_vector[i]);
+	}
+	printf("\n");
+	///test
+
 	//preparazione per il lancio del kernel
 	int* triangular_matrix, *dev_triangular_matrix, *dev_rotations_vector, *dev_end_displacement_vector, *dev_top_matching, *dev_men_preferences, *dev_women_preferences; 
 
@@ -119,7 +133,7 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	printf("\nprima del lancio del kernel\n");
 	//lancio del kernel
 	int NumThPerBlock = min(max(number_of_rotations, n), 1024);
-	build_graph_CUDA<<<1, NumThPerBlock>>>(n, number_of_rotations, dev_rotations_vector, dev_end_displacement_vector,  dev_top_matching, dev_women_preferences, dev_men_preferences, dev_triangular_matrix);
+	build_graph_CUDA<<<1, NumThPerBlock>>>(n, number_of_rotations, total_number_of_pairs, dev_rotations_vector, dev_end_displacement_vector,  dev_top_matching, dev_women_preferences, dev_men_preferences, dev_triangular_matrix);
 	printf("\ndopo del lancio del kernel\n");
 
 	//libero memoria
