@@ -116,7 +116,7 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	//preparazione per il lancio del kernel
 	int* triangular_matrix, *dev_triangular_matrix, *dev_rotations_vector, *dev_end_displacement_vector, *dev_top_matching, *dev_men_preferences, *dev_women_preferences; 
 
-	HANDLE_ERROR(cudaHostAlloc((void**)&triangular_matrix, sizeof (int) * ((n-1)*n)/2, cudaHostAllocMapped));
+	HANDLE_ERROR(cudaHostAlloc((void**)&triangular_matrix, sizeof (int) * ((n-1)*n)/2+n, cudaHostAllocMapped));
 	
 	HANDLE_ERROR(cudaHostGetDevicePointer(&dev_triangular_matrix, triangular_matrix, 0));
 	HANDLE_ERROR(cudaHostGetDevicePointer(&dev_rotations_vector, rotations_vector, 0));

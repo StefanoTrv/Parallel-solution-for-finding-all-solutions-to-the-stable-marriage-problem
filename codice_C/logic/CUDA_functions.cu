@@ -160,6 +160,13 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int total_numbe
 			}
 			printf("\n");
 		}
+		printf("\nTriangular matrix:\n");
+		for(i=0;i<n;i++){
+			for(j=0; j<n; j++){
+				printf("%i\t",triangular_matrix[i*n+j]);
+			}
+			printf("\n");
+		}
 		free(label_matrix);
 		free(is_stable_matrix);
 		free(label_second_condition);
