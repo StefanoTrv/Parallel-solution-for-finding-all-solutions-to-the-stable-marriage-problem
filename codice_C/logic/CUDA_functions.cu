@@ -196,5 +196,7 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int total_numbe
 		free(is_stable_matrix);
 		free(label_second_condition);
 		free(applied_rotations);
+		free(first_men_preferences_index);
+		free(first_women_preferences_index);
 	}
 }
