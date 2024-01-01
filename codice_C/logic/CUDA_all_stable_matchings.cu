@@ -116,9 +116,13 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	//preparazione per il lancio del kernel
 	int* triangular_matrix, *dev_triangular_matrix, *dev_rotations_vector, *dev_end_displacement_vector, *dev_top_matching, *dev_men_preferences, *dev_women_preferences; 
 
-	HANDLE_ERROR(cudaHostAlloc((void**)&triangular_matrix, sizeof (int) * ((n-1)*n)/2, cudaHostAllocMapped));
+	HANDLE_ERROR(cudaHostAlloc((void**)&triangular_matrix, sizeof (int) * ((number_of_rotations-1)*number_of_rotations)/2, cudaHostAllocMapped));
 	
-	HANDLE_ERROR(cudaHostGetDevicePointer(&dev_triangular_matrix, triangular_matrix, 0));
+	if(number_of_rotations>1){
+		(cudaHostGetDevicePointer(&dev_triangular_matrix, triangular_matrix, 0));
+	} else{
+		dev_triangular_matrix=NULL;
+	}
 	HANDLE_ERROR(cudaHostGetDevicePointer(&dev_rotations_vector, rotations_vector, 0));
 	HANDLE_ERROR(cudaHostGetDevicePointer(&dev_end_displacement_vector, end_displacement_vector, 0));
 
@@ -151,16 +155,23 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	int y;
 	struct SuccessorsList* sl_el;
 	while(list_el!=NULL){
+		printf("\\_/");
 		y=list_el->value->index;
 		for(int x = 0; x<y; x++){
-			//printf("x: %i   y: %i\n", x, y);
-			if(triangular_matrix[((y-1)*y)/2+x]){//se y dipende da x
+			printf("x: %i\ty: %i\ttriangular_matrix[%i] = %i\n", x, y,(y-1)*number_of_rotations+x,triangular_matrix[(y-1)*number_of_rotations+x]);
+			if(triangular_matrix[(y-1)*number_of_rotations+x]){//se y dipende da x
+				//printf("aggiungo dipendenza...");
 				list_el->value->missing_predecessors++;//incremento il numero di predecessori di y
+				//printf("\t%i\t",list_el->value->missing_predecessors);
 				//e aggiungo y tra i successori di x
 				sl_el=(struct SuccessorsList*)malloc(sizeof (struct SuccessorsList));
 				sl_el->value=list_el->value;
-				sl_el=rotation_vector[x]->successors;
+				//printf("\t%i\t",sl_el->value->index);
+				sl_el->next=rotation_vector[x]->successors;
+				//printf("\t%i-%i\t",sl_el->next->value->index,rotation_vector[x]->successors->value->index);
 				rotation_vector[x]->successors=sl_el;
+				//printf("\t%i-%i\t",rotation_vector[x]->successors->value->index,sl_el->value->index);
+				//printf("\n");
 			}
 		}
 		list_el=list_el->next;
