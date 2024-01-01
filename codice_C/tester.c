@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     }
     int seed, n, iterations;
     if(argc == 6){
-        seed = strtol(argv[4], NULL, 10);
+        seed = strtol(argv[5], NULL, 10);
     } else {
         seed = 42;
     }
