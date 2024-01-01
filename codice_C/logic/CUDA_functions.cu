@@ -161,9 +161,9 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int total_numbe
 			printf("\n");
 		}
 		printf("\nTriangular matrix:\n");
-		for(i=0;i<n;i++){
-			for(j=0; j<=i; j++){
-				printf("%i\t",triangular_matrix[(i-1)*i/2+i]);
+		for(i=1;i<n;i++){
+			for(j=0; j<i; j++){
+				printf("%i\t",triangular_matrix[i*n+j]);
 			}
 			printf("\n");
 		}
