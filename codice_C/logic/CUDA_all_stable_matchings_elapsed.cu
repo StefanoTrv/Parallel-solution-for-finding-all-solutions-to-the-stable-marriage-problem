@@ -1,7 +1,8 @@
 #include <stdlib.h>
+#include <chrono>
+#include <stdint.h>
 #include "..\utilities\utilities.h"
 #include "..\data_structures\data_structures.h"
-#include "serial_functions.h"
 
 
 #define min(i, j) (((i) < (j)) ? (i) : (j))

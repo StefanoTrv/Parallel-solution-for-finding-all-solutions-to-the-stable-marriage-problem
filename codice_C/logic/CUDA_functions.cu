@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "..\data_structures\data_structures.h"
 
 #define false 0

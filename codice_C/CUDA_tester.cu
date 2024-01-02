@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <chrono>
 #include "logic\parallel_functions.cuh"
 #include "data_structures\data_structures.h"
 #include "utilities\utilities.h"

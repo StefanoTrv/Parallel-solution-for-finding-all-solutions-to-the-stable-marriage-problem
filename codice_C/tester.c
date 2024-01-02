@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include "logic\serial_functions.h"
 #include "data_structures\data_structures.h"
