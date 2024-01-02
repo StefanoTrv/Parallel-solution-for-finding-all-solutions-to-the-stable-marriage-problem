@@ -26,6 +26,7 @@ int main(int argc, char* argv[]) {
     struct ResultsList* results_parallel;
     struct ResultsListElement* list_el_serial;
     struct ResultsListElement* list_el_parallel;
+    FILE* f = fopen("error.txt", "w");
 
     for(int i = 0; i < iterations; i++) {
         men_preferences = make_random_preferences(n);
@@ -51,19 +52,19 @@ int main(int argc, char* argv[]) {
                 } 
             }
             if (list_el_serial == NULL) {
-                printf("men_preferences:\n");
+                fprintf(f, "men_preferences:\n");
                 for (int i = 0; i < n; i++) {
                     for (int j = 0; j < n; j++) {
-                        printf("%i ", men_preferences[i * n + j]);
+                        fprintf(f, "%i ", men_preferences[i * n + j]);
                     }
-                    printf("\n");
+                    fprintf(f, "\n");
                 }
-                printf("\nwomen_preferences:\n");
+                fprintf(f, "\nwomen_preferences:\n");
                 for (int i = 0; i < n; i++) {
                     for (int j = 0; j < n; j++) {
-                        printf("%i ", women_preferences[i * n + j]);
+                        fprintf(f, "%i ", women_preferences[i * n + j]);
                     }
-                    printf("\n");
+                    fprintf(f, "\n");
                 }
                 printf("\nSerial solutions:\n");
                 struct ResultsListElement* r = results_serial->first;
