@@ -198,6 +198,36 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 		}
 		list_el=list_el->next;
 	}
+
+	struct RotationsListElement* lel = rotations_list->first;
+	struct RotationList* le;
+	struct SuccessorsList* sl;
+	printf("GRAFO PARALLELO:\n");
+	while(lel!=NULL){
+		le=lel->value->rotation;
+		while(le!=NULL){
+			printf("(%i,%i), ",le->man,le->woman);
+			le=le->next;
+		}
+		printf("ha indice %i e ",lel->value->index);
+		if(lel->value->missing_predecessors>0) printf("non ");
+		printf("e' una rotazione libera");
+		if(lel->value->missing_predecessors>0){
+			printf(" con %i predecessori: ",lel->value->missing_predecessors);
+			sl=lel->value->successors;
+			printf(" con %i predecessori e i seguenti successori: ",lel->value->missing_predecessors);
+			sl=lel->value->successors;
+			while(sl!=NULL) {
+				printf("%i, ",sl->value->index);
+				sl=sl->next;
+			}
+		}
+		printf("\n");
+		lel = lel->next;
+	}
+	printf("\n\n");
+	
+
 	
 	//printf("\nAggiungo top matching ai risultati");
 	//aggiungo top matching ai risultati
