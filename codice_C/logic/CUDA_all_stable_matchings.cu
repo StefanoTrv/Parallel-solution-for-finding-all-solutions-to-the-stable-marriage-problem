@@ -110,7 +110,7 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	printf("\n");*/
 
 	//preparazione per il lancio del kernel
-	int* triangular_matrix, *dev_triangular_matrix, *dev_rotations_vector, *dev_end_displacement_vector, *dev_top_matching, *dev_men_preferences, *dev_women_preferences; 
+	int* triangular_matrix, *dev_triangular_matrix, *dev_rotations_vector, *dev_end_displacement_vector, *dev_top_matching, *dev_men_preferences, *dev_women_preferences;
 
 	HANDLE_ERROR(cudaHostAlloc((void**)&triangular_matrix, sizeof (int) * ((number_of_rotations-1)*number_of_rotations)/2, cudaHostAllocMapped));
 	
@@ -133,6 +133,9 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	//printf("\nprima del lancio del kernel\n");
 	//lancio del kernel
 	int NumThPerBlock = min(max(number_of_rotations, n), 1024);
+	size_t free_t,total_t;
+	cudaMemGetInfo(&free_t,&total_t);
+	cudaDeviceSetLimit(cudaLimitMallocHeapSize, free_t * 0.9);
 	build_graph_CUDA<<<1, NumThPerBlock>>>(n, number_of_rotations, total_number_of_pairs, dev_rotations_vector, dev_end_displacement_vector,  dev_top_matching, dev_women_preferences, dev_men_preferences, dev_triangular_matrix);
 	//printf("\ndopo del lancio del kernel\n");
 
