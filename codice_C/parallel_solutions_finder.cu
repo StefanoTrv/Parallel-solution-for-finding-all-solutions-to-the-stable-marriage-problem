@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "logic\CUDA_functions.cuh"
+#include "logic\parallel_functions.cuh"
 #include "data_structures\data_structures.h"
 #include "utilities\utilities.h"
 #include "input_output.h"

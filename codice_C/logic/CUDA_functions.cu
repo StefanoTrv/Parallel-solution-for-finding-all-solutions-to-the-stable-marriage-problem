@@ -29,7 +29,7 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int total_numbe
 
 	for(i=threadIdx.x;i<n;i+=blockDim.x){
 		for(j=0; j<n; j++){
-			label_matrix[i*n+j]=number_of_rotations;
+			label_matrix[i*n+j]=n;
 			is_stable_matrix[j*n+i]=false;
 			label_second_condition[j*n+i]=false;
 		}
@@ -113,7 +113,7 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int total_numbe
 			p_star=-1;
 			for(j=k;j<n;j++){
 				woman = men_preferences[man*n+j];
-				if(label_matrix[woman*n+man]==number_of_rotations) continue;
+				if(label_matrix[woman*n+man]==n) continue;
 				if(is_stable_matrix[woman*n+man]){//label di tipo 1
 					if(p_star!=-1){
 						triangular_matrix[(label_matrix[woman*n+man]-1)*number_of_rotations+p_star]=true;
