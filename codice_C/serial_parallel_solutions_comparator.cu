@@ -2,7 +2,7 @@
 #include "data_structures\data_structures.h"
 #include "utilities\utilities.h"
 #include "logic\serial_functions.h"
-#include "logic\parallel_functions.cuh"
+#include "logic\CUDA_functions.cuh"
 
 int main(int argc, char* argv[]) {
     if (argc != 3 && argc != 4) {
