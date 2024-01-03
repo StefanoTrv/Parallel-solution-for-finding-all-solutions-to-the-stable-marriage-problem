@@ -48,7 +48,7 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int total_numbe
 
 	for (i=threadIdx.x;i<number_of_rotations;i+=blockDim.x){
 		for(j=0;j<n;j++){
-			applied_rotations[j*n+i]=false;
+			applied_rotations[j*number_of_rotations+i]=false;
 		}
 	}
 	__syncwarp();
@@ -119,10 +119,10 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int total_numbe
 						triangular_matrix[(label_matrix[woman*n+man]-1)*number_of_rotations+p_star]=true;
 					}
 					p_star=label_matrix[woman*n+man];
-					applied_rotations[man*n+label_matrix[woman*n+man]]=true;
-				} else if(!applied_rotations[man*n+label_matrix[woman*n+man]] && label_second_condition[man*n+woman]){//label di tipo 2
+					applied_rotations[man*number_of_rotations+label_matrix[woman*n+man]]=true;
+				} else if(!applied_rotations[man*number_of_rotations+label_matrix[woman*n+man]] && label_second_condition[man*n+woman]){//label di tipo 2
 					triangular_matrix[(p_star-1)*number_of_rotations+label_matrix[woman*n+man]]=true;
-					applied_rotations[man*n+label_matrix[woman*n+man]]=true;
+					applied_rotations[man*number_of_rotations+label_matrix[woman*n+man]]=true;
 				}
 			}
 		}

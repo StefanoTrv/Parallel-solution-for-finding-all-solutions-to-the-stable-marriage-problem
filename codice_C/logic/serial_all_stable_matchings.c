@@ -54,8 +54,9 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 		}
 		list_el=list_el->next;
 	}
-	/*
-	struct RotationsListElement* lel = rotations_list->first;
+
+	//TEST
+	/*struct RotationsListElement* lel = rotations_list->first;
 	struct RotationList* le;
 	struct SuccessorsList* sl;
 	printf("\nGRAFO SERIALE:\n");
@@ -81,8 +82,8 @@ struct ResultsList* all_stable_matchings(int n, int* men_preferences, int* women
 		printf("\n");
 		lel = lel->next;
 	}
-	printf("\n\n");
-	*/
+	printf("\n\n");*/
+	//TEST
 	
 	//aggiungo top matching ai risultati
 	results_list->first = (struct ResultsListElement*) malloc(sizeof (struct ResultsListElement));

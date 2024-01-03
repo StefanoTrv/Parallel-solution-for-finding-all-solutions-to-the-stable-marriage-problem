@@ -198,7 +198,9 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 		}
 		list_el=list_el->next;
 	}
-/*
+
+	//TEST
+	/*
 	struct RotationsListElement* lel = rotations_list->first;
 	struct RotationList* le;
 	struct SuccessorsList* sl;
@@ -226,7 +228,7 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 		lel = lel->next;
 	}
 	printf("\n\n");*/
-	
+	//TEST
 
 	
 	//printf("\nAggiungo top matching ai risultati");
