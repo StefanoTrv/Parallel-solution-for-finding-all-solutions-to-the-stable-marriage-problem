@@ -1,38 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "data_structures\data_structures.h"
-#include "input_output.h"
-
-
-struct StablePermutations {
-	struct StablePermutationElement* first;
-    struct StablePermutationElement* last;
-};
-
-struct StablePermutationElement {
-	int* value;	//il matching
-	struct StablePermutationElement* next;
-};
-
-void appenStablePermsList(struct StablePermutations* list, int* result){
-	struct StablePermutationElement *new_el = (struct StablePermutationElement*)malloc(sizeof (struct StablePermutationElement));
-	new_el->value = result;
-	new_el->next = NULL;
-	if (list->first==NULL){
-		list->first = new_el;
-		list->last=new_el;
-	}else{
-		list->last->next = new_el;
-		list->last = new_el;
-	}
-}
-
+#include "..\data_structures\data_structures.h"
 
 int is_matching_stable(int*, int*, int*, int);
 void swap(int*, int*);
-void generate_permutations(int*, int*, struct StablePermutations*, int*, int, int); 
-void all_permutations(int*, int*, int, struct StablePermutations*);
+void generate_permutations(int*, int*, struct ResultsList*, int*, int, int); 
+void all_permutations(int*, int*, int, struct ResultsList*);
 void compare_solutions(int*, int*, int, struct ResultsList*);
 
 
@@ -42,7 +16,7 @@ int is_matching_stable(int* men_preferences, int* women_preferences, int *matchi
         int actualWoman = matching[man];
 
         if (actualWoman != -1) {
-            // Trova le donne che l'uomo preferisce all'attuale compagna
+            //Finds women that man prefers that actual woman
             int *preferredWomen = &men_preferences[man * n];
             int indexActualWoman = -1;
             for (int j = 0; j < n; j++) {
@@ -52,12 +26,12 @@ int is_matching_stable(int* men_preferences, int* women_preferences, int *matchi
                 }
             }
 
-            // Verifica se la donna preferisce l'uomo all'attuale compagno
+            //Checks if woman prefers man that actual man        
             for (int j = 0; j < indexActualWoman; j++) {
                 int woman = preferredWomen[j];
                 int actualManOfWoman = -1;
 
-                // Trova l'uomo attuale della donna
+                //Finds actual man of woman
                 for (int k = 0; k < n; k++) {
                     if (matching[k] == woman) {
                         actualManOfWoman = k;
@@ -86,28 +60,28 @@ void swap(int *a, int *b) {
 }
 
 
-void generate_permutations(int* men_preferences, int* women_preferences, struct StablePermutations* perms, int* array, int start, int end) {
+void generate_permutations(int* men_preferences, int* women_preferences, struct ResultsList* perms, int* array, int start, int end) {
     if (start == end-1) {
         if (is_matching_stable(men_preferences, women_preferences, array, end)) {
             int* matching = (int*) malloc(sizeof(int) * end);
             for (int i = 0; i < end; i++) {
                 matching[i] = array[i];
             }
-            appenStablePermsList(perms, matching);    
+            appendResultsList(perms, matching);
         }
     } else {
         for (int i = start; i < end; i++) {
-            //Scambia gli elementi per generare tutte le permutazioni possibili
+            //Swap elements to generate all possible permutations
             swap(&array[start], &array[i]);
             generate_permutations(men_preferences, women_preferences, perms, array, start + 1, end);
-            //Ripristina lo stato originale per provare altre permutazioni
+            //Restore original state to find other permutations
             swap(&array[start], &array[i]);
         }
     }
 }
 
 
-void all_permutations(int* men_preferences, int* women_preferences, int n, struct StablePermutations* stable_perms) {
+void all_permutations(int* men_preferences, int* women_preferences, int n, struct ResultsList* stable_perms) {
     int* array = (int*) malloc(sizeof(int) * n);
     for (int i = 0; i < n; i++) {
         array[i] = i;
@@ -118,14 +92,14 @@ void all_permutations(int* men_preferences, int* women_preferences, int n, struc
 
 
 void compare_solutions(int* men_preferences, int* women_preferences, int n, struct ResultsList* results) {
-    struct StablePermutations* stable_perms = (struct StablePermutations*) malloc(sizeof(struct StablePermutations));
+    struct ResultsList* stable_perms = (struct ResultsList*) malloc(sizeof(struct ResultsList));
     stable_perms->first = NULL;
     stable_perms->last = NULL;
 
     all_permutations(men_preferences, women_preferences, n, stable_perms);
 
     struct ResultsListElement* res_list_el = results->first;
-    struct StablePermutationElement* stable_perms_list_el = stable_perms->first;
+    struct ResultsListElement* stable_perms_list_el = stable_perms->first;
 
     while(stable_perms_list_el != NULL) {
         int* matching_res = res_list_el->value;
@@ -164,7 +138,7 @@ void compare_solutions(int* men_preferences, int* women_preferences, int n, stru
                 r = r->next;
             }
             printf("\nNaive solutions:\n");
-            struct StablePermutationElement* p = stable_perms->first;
+            struct ResultsListElement* p = stable_perms->first;
             while (p != NULL) {
                 for (int i = 0; i < n; i++) {
                     printf("%i ", p->value[i]);

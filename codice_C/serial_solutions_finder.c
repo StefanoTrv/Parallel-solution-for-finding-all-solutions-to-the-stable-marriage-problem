@@ -2,7 +2,6 @@
 #include "logic\serial_functions.h"
 #include "data_structures\data_structures.h"
 #include "utilities\utilities.h"
-#include "input_output.h"
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
@@ -34,10 +33,8 @@ int main(int argc, char* argv[]) {
     list_el = results->first;
     while(list_el!=NULL){
         for (int i = 0; i < n; i++) {
-            printf("%i, ", list_el->value[i]);
             fprintf(out_ptr, "%i ", list_el->value[i]);
         }
-        printf("\n");
         fprintf(out_ptr, "\n");
         list_el=list_el->next;
     }

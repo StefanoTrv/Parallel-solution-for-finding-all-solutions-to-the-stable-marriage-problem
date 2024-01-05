@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
-//crea una singola tabella n*n di preferenze
-//si può impostare il seme chiamando prima srand()
+//Create a n*n preference matrix
+//Seed can be set by calling srand() first
 int* make_random_preferences(int n){
 	int* preferences = (int*)malloc(sizeof (int) * n * n);
 	int* numbers = (int*)malloc(sizeof (int) * n);

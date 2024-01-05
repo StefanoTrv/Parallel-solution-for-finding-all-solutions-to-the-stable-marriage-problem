@@ -5,7 +5,7 @@ NVCC = nvcc
 
 #To test serial version with single instances from a .txt file. Examples can be found in \tests\.	
 serial.o: serial_solutions_finder.c
-	$(CC) serial_solutions_finder.c -o serial.o
+	$(CC) serial_solutions_finder.c -o serial
 
 serial: serial.o
 	.\serial $(input_file) $(output_file)
@@ -14,7 +14,7 @@ serial: serial.o
 #To launch multiple pseudo-random tests genareted on serial version, by giving instance dimension and number of iterations. 
 #Also, by specifying mode, time taken by the algorithm can be measured. Otherwise, mode should be "classic".
 tester.o: tester.c
-	$(CC) tester.c -o tester.o
+	$(CC) tester.c -o tester
 
 tester: tester.o
 	.\tester $(instances) $(iterations) $(mode) $(output_file)
