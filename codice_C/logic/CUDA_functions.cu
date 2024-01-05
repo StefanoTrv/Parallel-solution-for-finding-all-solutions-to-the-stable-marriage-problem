@@ -8,10 +8,10 @@
 
 __global__ void build_graph_CUDA(int, int, int, int*, int*, int*, int*, int*, int*);
 
-__device__ int* label_matrix;
-__device__ char* is_stable_matrix;
-__device__ char* label_second_condition;
-__device__ int* applied_rotations;
+__shared__ int* label_matrix;
+__shared__ char* is_stable_matrix;
+__shared__ char* label_second_condition;
+__shared__ int* applied_rotations;
 __shared__ int* first_men_preferences_index;
 __shared__ int* first_women_preferences_index;
 
@@ -29,11 +29,10 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int total_numbe
 
 	for(i=threadIdx.x;i<n;i+=blockDim.x){
 		for(j=0; j<n; j++){
-			label_matrix[i*n+j]=number_of_rotations;
+			label_matrix[j*n+i]=number_of_rotations;
 			is_stable_matrix[j*n+i]=false;
 			label_second_condition[j*n+i]=false;
 		}
-		woman = top_matching[i];
 	}
 	__syncthreads();
 
