@@ -17,7 +17,7 @@ tester.o: tester.c
 	$(CC) tester.c -o tester
 
 tester: tester.o
-	.\tester $(instances) $(iterations) $(mode) $(output_file)
+	.\tester $(instance) $(iterations) $(mode) $(output_file)
 
 
 #To test parallel version with single instances from a .txt file. Examples can be found in \tests\.	
@@ -34,7 +34,7 @@ CUDA_tester.o: CUDA_tester.cu
 	$(NVCC) $(CUDAFLAGS) CUDA_tester.cu -o CUDAtester
 
 cuda_tester: CUDA_tester.o
-	.\CUDAtester $(instances) $(iterations) $(mode) $(output_file)
+	.\CUDAtester $(instance) $(iterations) $(mode) $(output_file)
 
 
 #To test both versions
@@ -42,7 +42,7 @@ solutions_comparator.o: solutions_comparator.cu
 	$(NVCC) $(CUDAFLAGS) solutions_comparator.cu -o solutions_comparator
 
 comparator: solutions_comparator.o
-	.\solutions_comparator $(instances) $(iterations)
+	.\solutions_comparator $(instance) $(iterations)
 
 
 clean:
