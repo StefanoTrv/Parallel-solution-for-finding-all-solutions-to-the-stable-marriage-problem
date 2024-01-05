@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "logic\serial_functions.h"
+#include "logic\serial_all_stable_matchings_elapsed.h"
 #include "data_structures\data_structures.h"
 #include "utilities\utilities.h"
 

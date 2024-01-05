@@ -2,6 +2,7 @@
 #include <chrono>
 #include <stdint.h>
 #include "..\utilities\utilities.h"
+#include "..\utilities\handle_error.cuh"
 #include "..\data_structures\data_structures.h"
 
 
@@ -9,20 +10,21 @@
 #define max(i, j) (((i) > (j)) ? (i) : (j))
 
 
-static void HandleError( cudaError_t err, const char *file, int line ) {
-	if (err != cudaSuccess) {
-		printf( "%s in %s at line %d\n", cudaGetErrorString( err ), file, line );
-		exit( EXIT_FAILURE );
-	}
-}
+struct ResultsList* all_stable_matchings_times_CUDA(int n, int* men_preferences, int* women_preferences, int* time_gale_shapley, int* time_find_all_rotations, int* time_overhead, int* time_kernel, int* time_recursive){
+	// Time measure
+    std::chrono::steady_clock::time_point start_time;
+    std::chrono::steady_clock::time_point end_time;
+	std::chrono::steady_clock::time_point start_time_kernel;
+    std::chrono::steady_clock::time_point end_time_kernel;
 
-#define HANDLE_ERROR( err ) (HandleError( err, __FILE__, __LINE__ ))
-
-
-struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* women_preferences){
 	struct ResultsList* results_list = (struct ResultsList*) malloc(sizeof (struct ResultsList));
+	
+	start_time = std::chrono::steady_clock::now();
 	int* top_matching = gale_shapley(n,men_preferences,women_preferences);
 	int* inverted_bottom_matching = gale_shapley(n, women_preferences, men_preferences);
+	end_time = std::chrono::steady_clock::now();
+	*time_gale_shapley = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+
 	int* bottom_matching = (int*)malloc(sizeof (int) * n);
 	for(int i = 0; i < n; i++){
 		bottom_matching[inverted_bottom_matching[i]] = i;
@@ -53,15 +55,19 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	}
 
 	//crea la lista delle rotazioni
-	struct RotationsList* rotations_list = find_all_rotations(men_preferences, women_preferences, n, top_matching_copy, bottom_matching);
+	start_time = std::chrono::steady_clock::now();
+	struct RotationsList* rotations_list = find_all_rotations(men_preferences, women_preferences, n, top_matching_copy,bottom_matching);
+	end_time = std::chrono::steady_clock::now();
+	*time_find_all_rotations = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
 	free(bottom_matching);
-	
-	//crea il grafo delle rotazioni
 
+	//crea il grafo delle rotazioni
+	start_time = std::chrono::steady_clock::now();
 	//printf("INIZIO");
 
 	//SEZIONE PARALLELIZZATA
 	//creazione delle strutture dati di input
+	start_time = std::chrono::steady_clock::now();
 	int number_of_rotations = 0;
 	int total_number_of_pairs = 0;
 	struct RotationsListElement* list_el = rotations_list->first;
@@ -111,7 +117,7 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	printf("\n");*/
 
 	//preparazione per il lancio del kernel
-	int* triangular_matrix, *dev_triangular_matrix, *dev_rotations_vector, *dev_end_displacement_vector, *dev_top_matching, *dev_men_preferences, *dev_women_preferences; 
+	int* triangular_matrix, *dev_triangular_matrix, *dev_rotations_vector, *dev_end_displacement_vector, *dev_top_matching, *dev_men_preferences, *dev_women_preferences;
 
 	HANDLE_ERROR(cudaHostAlloc((void**)&triangular_matrix, sizeof (int) * ((number_of_rotations-1)*number_of_rotations)/2, cudaHostAllocMapped));
 	
@@ -134,11 +140,18 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	//printf("\nprima del lancio del kernel\n");
 	//lancio del kernel
 	int NumThPerBlock = min(max(number_of_rotations, n), 1024);
+	size_t free_t,total_t;
+	cudaMemGetInfo(&free_t,&total_t);
+	cudaDeviceSetLimit(cudaLimitMallocHeapSize, free_t * 0.9);
+	start_time_kernel = std::chrono::steady_clock::now();
 	build_graph_CUDA<<<1, NumThPerBlock>>>(n, number_of_rotations, total_number_of_pairs, dev_rotations_vector, dev_end_displacement_vector,  dev_top_matching, dev_women_preferences, dev_men_preferences, dev_triangular_matrix);
 	//printf("\ndopo del lancio del kernel\n");
 
 	//libero memoria
 	cudaDeviceSynchronize();
+	end_time_kernel = std::chrono::steady_clock::now();
+	*time_kernel = std::chrono::duration_cast<std::chrono::milliseconds>(end_time_kernel - start_time_kernel).count();
+
 	HANDLE_ERROR(cudaFree(dev_top_matching));
 	//printf("\nprima liberazione\n");
 	HANDLE_ERROR(cudaFree(dev_men_preferences));
@@ -181,6 +194,8 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	HANDLE_ERROR(cudaFreeHost(end_displacement_vector));
 	free(rotation_vector);
 
+	end_time = std::chrono::steady_clock::now();
+	*time_overhead = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
 	//FINE SEZIONE PARALLELIZZATA
 	//printf("\nFINE");
 
@@ -190,105 +205,6 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	free_rotations_list->first=NULL;
 	free_rotations_list->last=NULL;
 	list_el = rotations_list->first;
-	while(list_el!=NULL){
-		if(list_el->value->missing_predecessors==0){
-			appendRotationsList(free_rotations_list,list_el->value);
-		}
-		list_el=list_el->next;
-	}
-	
-	//printf("\nAggiungo top matching ai risultati");
-	//aggiungo top matching ai risultati
-	results_list->first = (struct ResultsListElement*) malloc(sizeof (struct ResultsListElement));
-	for(int i = 0; i < n; i++){ //per non lavorare sul matching salvato tra i risultati
-		top_matching_copy[i] = top_matching[i];
-	}
-	results_list->first->value = top_matching_copy;
-	results_list->first->next = NULL;
-	results_list->last = results_list->first;
-	
-	//printf("\nRicerca ricorsiva dei risultati");
-	if(rotations_list->first != NULL){
-		recursive_search(top_matching, n, free_rotations_list->first, results_list);
-	}
-		
-	//printf("\nUltimi free\n");
-	free(top_matching);
-	free_rotations_list_struct(rotations_list);
-	list_el=free_rotations_list->first;
-	struct RotationsListElement* temp;
-	while(list_el!=NULL){
-		temp=list_el;
-		list_el=list_el->next;
-		free(temp);
-	}
-	free(free_rotations_list);
-	return results_list;
-}
-
-
-
-/*struct ResultsList* all_stable_matchings_times_CUDA(int n, int* men_preferences, int* women_preferences, int* time_gale_shapley, int* time_find_all_rotations, int* time_build_graph, int* time_recursive){
-	// Time measure
-    std::chrono::steady_clock::time_point start_time;
-    std::chrono::steady_clock::time_point end_time;
-
-	struct ResultsList* results_list = (struct ResultsList*) malloc(sizeof (struct ResultsList));
-	
-	start_time = std::chrono::steady_clock::now();
-	int* top_matching = gale_shapley(n,men_preferences,women_preferences);
-	end_time = std::chrono::steady_clock::now();
-	*time_gale_shapley = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-
-	int* inverted_bottom_matching = gale_shapley(n, women_preferences, men_preferences);
-	int* bottom_matching = (int*)malloc(sizeof (int) * n);
-	for(int i = 0; i < n; i++){
-		bottom_matching[inverted_bottom_matching[i]] = i;
-	}
-	free(inverted_bottom_matching);
-
-	//termina subito se non ci sono rotazioni
-	int only_one_matching=1;
-	for(int i=0;i<n;i++){
-		if(top_matching[i]!=bottom_matching[i]){
-			only_one_matching=0;
-			break;
-		}
-	}
-	if(only_one_matching){
-		results_list->first = (struct ResultsListElement*) malloc(sizeof (struct ResultsListElement));
-		results_list->first->value = top_matching;
-		results_list->first->next = NULL;
-		results_list->last = results_list->first;
-		free(bottom_matching);
-		return results_list;
-	}
-	
-	//copia top_matching
-	int* top_matching_copy = (int*) malloc(sizeof (int) * n);
-	for(int i = 0; i < n; i++){
-		top_matching_copy[i] = top_matching[i];
-	}
-
-	//crea la lista delle rotazioni
-	start_time = std::chrono::steady_clock::now();
-	struct RotationsList* rotations_list = find_all_rotations(men_preferences, women_preferences, n, top_matching_copy,bottom_matching);
-	free(bottom_matching);
-	end_time = std::chrono::steady_clock::now();
-	*time_find_all_rotations = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-
-	
-	//crea il grafo delle rotazioni
-	start_time = std::chrono::steady_clock::now();
-	build_graph(n, rotations_list, top_matching, men_preferences, women_preferences);
-	end_time = std::chrono::steady_clock::now();
-	*time_build_graph = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-
-	//calcolo la lista delle rotazioni libere
-	struct RotationsList* free_rotations_list = (struct RotationsList*)malloc(sizeof (struct RotationsList));
-	free_rotations_list->first=NULL;
-	free_rotations_list->last=NULL;
-	struct RotationsListElement* list_el = rotations_list->first;
 	while(list_el!=NULL){
 		if(list_el->value->missing_predecessors==0){
 			appendRotationsList(free_rotations_list,list_el->value);
@@ -323,4 +239,4 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	}
 	free(free_rotations_list);
 	return results_list;
-}*/
+}
