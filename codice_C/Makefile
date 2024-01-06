@@ -1,6 +1,7 @@
 CC = gcc
 NVCC = nvcc
 #CUDAFLAGS = set your hw flags here
+SEED = $(seed)
 
 
 #To test serial version with single instances from a .txt file. Examples can be found in \tests\.	
@@ -17,7 +18,13 @@ tester.o: tester.c
 	$(CC) tester.c -o tester
 
 tester: tester.o
+ifeq ($(seed),default)
+#	@echo $(SEED)
 	.\tester $(instance) $(iterations) $(mode) $(output_file)
+else
+#	@echo $(SEED)
+	.\tester $(instance) $(iterations) $(mode) $(output_file) $(SEED)
+endif
 
 
 #To test parallel version with single instances from a .txt file. Examples can be found in \tests\.	
@@ -34,7 +41,13 @@ CUDA_tester.o: CUDA_tester.cu
 	$(NVCC) $(CUDAFLAGS) CUDA_tester.cu -o CUDAtester
 
 cuda_tester: CUDA_tester.o
+ifeq ($(seed),default)
+#	@echo $(SEED)
 	.\CUDAtester $(instance) $(iterations) $(mode) $(output_file)
+else
+#	@echo $(SEED)
+	.\CUDAtester $(instance) $(iterations) $(mode) $(output_file) $(SEED)
+endif
 
 
 #To test both versions
@@ -42,8 +55,13 @@ solutions_comparator.o: solutions_comparator.cu
 	$(NVCC) $(CUDAFLAGS) solutions_comparator.cu -o solutions_comparator
 
 comparator: solutions_comparator.o
+ifeq ($(seed),default)
+#	@echo $(SEED)
 	.\solutions_comparator $(instance) $(iterations)
-
+else
+#	@echo $(SEED)
+	.\solutions_comparator $(instance) $(iterations) $(SEED)
+endif
 
 clean:
 	del $(wildcard *.exe) $(wildcard *.exp) $(wildcard *.pdb) $(wildcard *.lib) $(wildcard *.o)
