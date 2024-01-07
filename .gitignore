@@ -58,3 +58,5 @@ dkms.conf
 #File di output
 codice_c/out.txt
 codice_c/out*.txt
+
+codice_C/error.txt
