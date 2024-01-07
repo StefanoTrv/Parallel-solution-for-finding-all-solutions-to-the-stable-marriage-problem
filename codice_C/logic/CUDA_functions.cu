@@ -79,7 +79,6 @@ __global__ void build_graph_CUDA(int n, int number_of_rotations, int total_numbe
 				woman=rotations_vector[total_number_of_pairs+j];
 				//aggiorna rispetto alla donna
 				k=first_women_preferences_index[next_woman]-1;
-				//printf("\nkw[%i] = %i",next_woman,k);
 				while(women_preferences[next_woman*n+k]!=man){
 					atomicMin(label_matrix + (next_woman*n+women_preferences[next_woman*n+k]),i);// => label_matrix[next_woman*n+women_preferences[next_woman*n+k]]=i;
 					k--;

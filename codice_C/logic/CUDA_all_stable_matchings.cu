@@ -48,8 +48,6 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	
 	//crea il grafo delle rotazioni
 
-	//printf("INIZIO");
-
 	//SEZIONE PARALLELIZZATA
 	//creazione delle strutture dati di input
 	int number_of_rotations = 0;
@@ -89,17 +87,6 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 		list_el=list_el->next;
 	}
 
-	/*printf("\nVettore delle rotazioni:\n");
-	for(int i=0;i<total_number_of_pairs;i++){
-		printf("(%i,%i)",rotations_vector[i],rotations_vector[total_number_of_pairs+i]);
-	}
-	printf("\n");
-	printf("\nVettore dei displacement:\n");
-	for(int i=0;i<number_of_rotations;i++){
-		printf("%i ",end_displacement_vector[i]);
-	}
-	printf("\n");*/
-
 	//preparazione per il lancio del kernel
 	int* triangular_matrix, *dev_triangular_matrix, *dev_rotations_vector, *dev_end_displacement_vector, *dev_top_matching, *dev_men_preferences, *dev_women_preferences;
 
@@ -121,48 +108,32 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	HANDLE_ERROR(cudaMemcpy(dev_men_preferences, men_preferences, sizeof(int) * n * n, cudaMemcpyHostToDevice));
 	HANDLE_ERROR(cudaMemcpy(dev_women_preferences, women_preferences, sizeof(int) * n * n, cudaMemcpyHostToDevice));
 
-	//printf("\nprima del lancio del kernel\n");
 	//lancio del kernel
 	int NumThPerBlock = min(max(number_of_rotations, n), 1024);
 	size_t free_t,total_t;
 	cudaMemGetInfo(&free_t,&total_t);
 	cudaDeviceSetLimit(cudaLimitMallocHeapSize, free_t * 0.9);
 	build_graph_CUDA<<<1, NumThPerBlock>>>(n, number_of_rotations, total_number_of_pairs, dev_rotations_vector, dev_end_displacement_vector,  dev_top_matching, dev_women_preferences, dev_men_preferences, dev_triangular_matrix);
-	//printf("\ndopo del lancio del kernel\n");
 
 	//libero memoria
-	cudaDeviceSynchronize();
 	HANDLE_ERROR(cudaFree(dev_top_matching));
-	//printf("\nprima liberazione\n");
 	HANDLE_ERROR(cudaFree(dev_men_preferences));
-	//printf("\nseconda liberazione\n");
 	HANDLE_ERROR(cudaFree(dev_women_preferences));
-	//printf("\nterza liberazione\n");
-
-	//printf("\ndopo la liberazione della memoria\n");
 
 	//applico i risultati alle strutture dati dell'host
 	list_el = rotations_list->first;
 	int y;
 	struct SuccessorsList* sl_el;
 	while(list_el!=NULL){
-		//printf("\\_/");
 		y=list_el->value->index;
 		for(int x = 0; x<y; x++){
-			//printf("x: %i\ty: %i\ttriangular_matrix[%i] = %i\n", x, y,(y-1)*number_of_rotations+x,triangular_matrix[(y-1)*number_of_rotations+x]);
 			if(triangular_matrix[(y-1)*number_of_rotations+x]){//se y dipende da x
-				//printf("aggiungo dipendenza...");
 				list_el->value->missing_predecessors++;//incremento il numero di predecessori di y
-				//printf("\t%i\t",list_el->value->missing_predecessors);
 				//e aggiungo y tra i successori di x
 				sl_el=(struct SuccessorsList*)malloc(sizeof (struct SuccessorsList));
 				sl_el->value=list_el->value;
-				//printf("\t%i\t",sl_el->value->index);
 				sl_el->next=rotation_vector[x]->successors;
-				//printf("\t%i-%i\t",sl_el->next->value->index,rotation_vector[x]->successors->value->index);
 				rotation_vector[x]->successors=sl_el;
-				//printf("\t%i-%i\t",rotation_vector[x]->successors->value->index,sl_el->value->index);
-				//printf("\n");
 			}
 		}
 		list_el=list_el->next;
@@ -175,9 +146,7 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	free(rotation_vector);
 
 	//FINE SEZIONE PARALLELIZZATA
-	//printf("\nFINE");
 
-	//printf("\nCalcolo lista rotazioni libere");
 	//calcolo la lista delle rotazioni libere
 	struct RotationsList* free_rotations_list = (struct RotationsList*)malloc(sizeof (struct RotationsList));
 	free_rotations_list->first=NULL;
@@ -190,39 +159,6 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 		list_el=list_el->next;
 	}
 
-	//TEST
-	/*
-	struct RotationsListElement* lel = rotations_list->first;
-	struct RotationList* le;
-	struct SuccessorsList* sl;
-	printf("GRAFO PARALLELO:\n");
-	while(lel!=NULL){
-		le=lel->value->rotation;
-		while(le!=NULL){
-			printf("(%i,%i), ",le->man,le->woman);
-			le=le->next;
-		}
-		printf("ha indice %i e ",lel->value->index);
-		if(lel->value->missing_predecessors>0) printf("non ");
-		printf("e' una rotazione libera");
-		if(lel->value->missing_predecessors>0){
-			printf(" con %i predecessori: ",lel->value->missing_predecessors);
-			sl=lel->value->successors;
-			printf(" con %i predecessori e i seguenti successori: ",lel->value->missing_predecessors);
-			sl=lel->value->successors;
-			while(sl!=NULL) {
-				printf("%i, ",sl->value->index);
-				sl=sl->next;
-			}
-		}
-		printf("\n");
-		lel = lel->next;
-	}
-	printf("\n\n");*/
-	//TEST
-
-	
-	//printf("\nAggiungo top matching ai risultati");
 	//aggiungo top matching ai risultati
 	results_list->first = (struct ResultsListElement*) malloc(sizeof (struct ResultsListElement));
 	for(int i = 0; i < n; i++){ //per non lavorare sul matching salvato tra i risultati
@@ -232,12 +168,10 @@ struct ResultsList* all_stable_matchings_CUDA(int n, int* men_preferences, int* 
 	results_list->first->next = NULL;
 	results_list->last = results_list->first;
 	
-	//printf("\nRicerca ricorsiva dei risultati");
 	if(rotations_list->first != NULL){
 		recursive_search(top_matching, n, free_rotations_list->first, results_list);
 	}
-		
-	//printf("\nUltimi free\n");
+	
 	free(top_matching);
 	free_rotations_list_struct(rotations_list);
 	list_el=free_rotations_list->first;
