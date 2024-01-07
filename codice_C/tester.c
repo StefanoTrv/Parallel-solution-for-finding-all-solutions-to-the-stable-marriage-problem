@@ -42,17 +42,20 @@ int main(int argc, char* argv[]) {
     int time_find_all_rotations = 0; 
     int time_build_graph = 0; 
     int time_recursive_search = 0;
+    int time_total;
 
     if (strcmp(argv[3], "times") == 0) {
-        fprintf(file, "Gale-Shapley\tFind All Rotations\tBuild Graph\tRecursive Search\n");
+        fprintf(file, "Gale-Shapley\tFind All Rotations\tBuild Graph\tRecursive Search\tTotal\n");
     }
 
     for(int i = 0; i < iterations; i++){
         men_preferences = make_random_preferences(n);
         women_preferences = make_random_preferences(n);
 
+        time_total = 0;
+
         if (strcmp(argv[3], "times") == 0) {
-            results = all_stable_matchings_times(n, men_preferences, women_preferences, &time_gale_shapley, &time_find_all_rotations, &time_build_graph, &time_recursive_search);
+            results = all_stable_matchings_times(n, men_preferences, women_preferences, &time_gale_shapley, &time_find_all_rotations, &time_build_graph, &time_recursive_search, &time_total);
         } else {
             start_time = currentTimeMillis();
             results = all_stable_matchings(n, men_preferences, women_preferences);
@@ -68,7 +71,7 @@ int main(int argc, char* argv[]) {
         }
 
         if (strcmp(argv[3], "times") == 0) {
-            fprintf(file, "%i\t\t\t\t%i\t\t\t\t\t%i\t\t\t%i\n", time_gale_shapley, time_find_all_rotations, time_build_graph, time_recursive_search);
+            fprintf(file, "%i\t\t\t\t%i\t\t\t\t\t%i\t\t\t%i\t\t\t\t\t%i\n", time_gale_shapley, time_find_all_rotations, time_build_graph, time_recursive_search, time_total);
         } else {
             fprintf(file, "%i\t%i\t%i\n", time, number_of_results, n);
         }

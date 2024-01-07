@@ -17,7 +17,7 @@ int64_t currentTimeMillis() {
 }
 
 
-struct ResultsList* all_stable_matchings_times(int n, int* men_preferences, int* women_preferences, int* time_gale_shapley, int* time_find_all_rotations, int* time_build_graph, int* time_recursive){
+struct ResultsList* all_stable_matchings_times(int n, int* men_preferences, int* women_preferences, int* time_gale_shapley, int* time_find_all_rotations, int* time_build_graph, int* time_recursive, int* time_total){
 	uint64_t start_time;
     uint64_t end_time;
     
@@ -27,7 +27,8 @@ struct ResultsList* all_stable_matchings_times(int n, int* men_preferences, int*
 	int* top_matching = gale_shapley(n,men_preferences,women_preferences);
 	int* inverted_bottom_matching = gale_shapley(n, women_preferences, men_preferences);
 	end_time = currentTimeMillis();
-	*time_gale_shapley = end_time - start_time;	
+	*time_gale_shapley = end_time - start_time;
+	*time_total += *time_gale_shapley;
 	
 	int* bottom_matching = (int*)malloc(sizeof (int) * n);
 	for(int i = 0; i < n; i++){
@@ -63,6 +64,7 @@ struct ResultsList* all_stable_matchings_times(int n, int* men_preferences, int*
 	struct RotationsList* rotations_list = find_all_rotations(men_preferences, women_preferences, n, top_matching_copy,bottom_matching);
 	end_time = currentTimeMillis();
 	*time_find_all_rotations = end_time - start_time;
+	*time_total += *time_find_all_rotations;
 	free(bottom_matching);
 	
 	//crea il grafo delle rotazioni
@@ -70,6 +72,7 @@ struct ResultsList* all_stable_matchings_times(int n, int* men_preferences, int*
 	build_graph(n, rotations_list, top_matching, men_preferences, women_preferences);
 	end_time = currentTimeMillis();
 	*time_build_graph = end_time - start_time;
+	*time_total += *time_build_graph;
 
 	//calcolo la lista delle rotazioni libere
 	struct RotationsList* free_rotations_list = (struct RotationsList*)malloc(sizeof (struct RotationsList));
@@ -97,6 +100,7 @@ struct ResultsList* all_stable_matchings_times(int n, int* men_preferences, int*
 		recursive_search(top_matching, n, free_rotations_list->first, results_list);
 		end_time = currentTimeMillis();
 		*time_recursive = end_time - start_time;
+		*time_total += *time_recursive;	
 	}
 	
 	free(top_matching);

@@ -12,7 +12,7 @@ serial: serial.o
 	.\serial $(input_file) $(output_file)
 
 
-#To launch multiple pseudo-random tests genareted on serial version, by giving instance dimension and number of iterations. 
+#To launch multiple pseudo-random tests genarated on serial version, by giving instance dimension and number of iterations. 
 #Also, by specifying mode, time taken by the algorithm can be measured. Otherwise, mode should be "classic".
 tester.o: tester.c
 	$(CC) tester.c -o tester
@@ -35,7 +35,7 @@ parallel: parallel.o
 	.\parallel $(input_file) $(output_file)
 
 
-#To launch multiple pseudo-random tests genareted on parallel version, by giving instance dimension and number of iterations. 
+#To launch multiple pseudo-random tests genarated on parallel version, by giving instance dimension and number of iterations. 
 #Also, by specifying mode, time taken by the algorithm can be measured. Otherwise, mode should be "classic".
 CUDA_tester.o: CUDA_tester.cu
 	$(NVCC) $(CUDAFLAGS) CUDA_tester.cu -o CUDAtester

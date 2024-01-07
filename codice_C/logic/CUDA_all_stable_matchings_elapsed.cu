@@ -10,7 +10,7 @@
 #define max(i, j) (((i) > (j)) ? (i) : (j))
 
 
-struct ResultsList* all_stable_matchings_times_CUDA(int n, int* men_preferences, int* women_preferences, int* time_gale_shapley, int* time_find_all_rotations, int* time_overhead, int* time_kernel, int* time_recursive){
+struct ResultsList* all_stable_matchings_times_CUDA(int n, int* men_preferences, int* women_preferences, int* time_gale_shapley, int* time_find_all_rotations, int* time_overhead, int* time_kernel, int* time_recursive, int* time_total){
 	// Time measure
     std::chrono::steady_clock::time_point start_time;
     std::chrono::steady_clock::time_point end_time;
@@ -24,6 +24,7 @@ struct ResultsList* all_stable_matchings_times_CUDA(int n, int* men_preferences,
 	int* inverted_bottom_matching = gale_shapley(n, women_preferences, men_preferences);
 	end_time = std::chrono::steady_clock::now();
 	*time_gale_shapley = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+	*time_total += *time_gale_shapley;
 
 	int* bottom_matching = (int*)malloc(sizeof (int) * n);
 	for(int i = 0; i < n; i++){
@@ -59,6 +60,7 @@ struct ResultsList* all_stable_matchings_times_CUDA(int n, int* men_preferences,
 	struct RotationsList* rotations_list = find_all_rotations(men_preferences, women_preferences, n, top_matching_copy,bottom_matching);
 	end_time = std::chrono::steady_clock::now();
 	*time_find_all_rotations = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+	*time_total += *time_find_all_rotations;
 	free(bottom_matching);
 
 	//crea il grafo delle rotazioni
@@ -196,6 +198,7 @@ struct ResultsList* all_stable_matchings_times_CUDA(int n, int* men_preferences,
 
 	end_time = std::chrono::steady_clock::now();
 	*time_overhead = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+	*time_total += *time_overhead;
 	//FINE SEZIONE PARALLELIZZATA
 	//printf("\nFINE");
 
@@ -226,6 +229,7 @@ struct ResultsList* all_stable_matchings_times_CUDA(int n, int* men_preferences,
 		recursive_search(top_matching, n, free_rotations_list->first, results_list);
 		end_time = std::chrono::steady_clock::now();
 		*time_recursive = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+		*time_total += *time_recursive;
 	}
 	
 	free(top_matching);
