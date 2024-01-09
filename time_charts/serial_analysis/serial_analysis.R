@@ -80,7 +80,7 @@ plot_frame
 library(ggplot2)
 plot <- ggplot(plot_frame, aes(x=instances_dim, y=percentage, fill=sub_algorithm))
 plot + 
-  geom_area(colour="black", size=.4, alpha=.7) +
+  geom_area(colour="black", lwd=.4, alpha=.7) +
   theme_bw() +
   scale_x_continuous(breaks=seq(500,4000,500)) +
   ggtitle("Ripartizione degli algoritmi (seriale)") +
