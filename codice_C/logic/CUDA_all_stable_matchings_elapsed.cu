@@ -10,7 +10,7 @@
 #define max(i, j) (((i) > (j)) ? (i) : (j))
 
 
-struct ResultsList* all_stable_matchings_times_CUDA(int n, int* men_preferences, int* women_preferences, int* time_gale_shapley, int* time_find_all_rotations, int* time_overhead, int* time_kernel, int* time_recursive, int* time_total){
+struct ResultsList* all_stable_matchings_times_CUDA(int n, int* men_preferences, int* women_preferences, int* time_gale_shapley, int* time_find_all_rotations, int* time_overhead, int* time_kernel, int* time_overhead_kernel, int* time_recursive, int* time_total){
 	// Time measure
     std::chrono::steady_clock::time_point start_time;
     std::chrono::steady_clock::time_point end_time;
@@ -197,7 +197,8 @@ struct ResultsList* all_stable_matchings_times_CUDA(int n, int* men_preferences,
 	free(rotation_vector);
 
 	end_time = std::chrono::steady_clock::now();
-	*time_overhead = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+	*time_overhead_kernel = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+	*time_overhead = *time_overhead_kernel - *time_kernel;
 	*time_total += *time_overhead;
 	//FINE SEZIONE PARALLELIZZATA
 	//printf("\nFINE");

@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
     int time_total;
 
     if (strcmp(argv[3], "times") == 0) {
-        fprintf(file, "Gale-Shapley\tFind All Rotations\tBuild Graph\tRecursive Search\tTotal\n");
+        fprintf(file, "Gale-Shapley FindAllRotations BuildGraph RecursiveSearch Total\n");
     }
 
     for(int i = 0; i < iterations; i++){
@@ -71,9 +71,9 @@ int main(int argc, char* argv[]) {
         }
 
         if (strcmp(argv[3], "times") == 0) {
-            fprintf(file, "%i\t\t\t\t%i\t\t\t\t\t%i\t\t\t%i\t\t\t\t\t%i\n", time_gale_shapley, time_find_all_rotations, time_build_graph, time_recursive_search, time_total);
+            fprintf(file, "%i %i %i %i %i\n", time_gale_shapley, time_find_all_rotations, time_build_graph, time_recursive_search, time_total);
         } else {
-            fprintf(file, "%i\t%i\t%i\n", time, number_of_results, n);
+            fprintf(file, "%i %i %i\n", time, number_of_results, n);
         }
 
         free(men_preferences);

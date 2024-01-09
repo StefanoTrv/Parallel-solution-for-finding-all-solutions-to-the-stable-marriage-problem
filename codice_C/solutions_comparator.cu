@@ -52,19 +52,19 @@ int main(int argc, char* argv[]) {
                 } 
             }
             if (list_el_serial == NULL) {
-                fprintf(f, "men_preferences:\n");
+                printf("men_preferences:\n");
                 for (int i = 0; i < n; i++) {
                     for (int j = 0; j < n; j++) {
-                        fprintf(f, "%i ", men_preferences[i * n + j]);
+                        printf("%i ", men_preferences[i * n + j]);
                     }
-                    fprintf(f, "\n");
+                    printf("\n");
                 }
-                fprintf(f, "\nwomen_preferences:\n");
+                printf("\nwomen_preferences:\n");
                 for (int i = 0; i < n; i++) {
                     for (int j = 0; j < n; j++) {
-                        fprintf(f, "%i ", women_preferences[i * n + j]);
+                        printf("%i ", women_preferences[i * n + j]);
                     }
-                    fprintf(f, "\n");
+                    printf("\n");
                 }
                 printf("\nSerial solutions:\n");
                 struct ResultsListElement* r = results_serial->first;

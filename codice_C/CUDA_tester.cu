@@ -39,12 +39,13 @@ int main(int argc, char* argv[]) {
     int time_gale_shapley = 0; 
     int time_find_all_rotations = 0; 
     int time_overhead = 0;
-    int time_kernel = 0; 
+    int time_kernel = 0;
+    int time_overhead_kernel = 0; 
     int time_recursive_search = 0;
     int time_total;
 
     if (strcmp(argv[3], "times") == 0) {
-        fprintf(file, "Gale-Shapley\tFind All Rotations\tOverhead\tKernel\tRecursive Search\tTotal\n");
+        fprintf(file, "Gale-Shapley FindAllRotations Overhead Kernel Kernel+Overhead RecursiveSearch Total\n");
     }
 
     for(int i = 0; i < iterations; i++){
@@ -54,7 +55,7 @@ int main(int argc, char* argv[]) {
         time_total = 0;
 
         if (strcmp(argv[3], "times") == 0) {
-            results = all_stable_matchings_times_CUDA(n, men_preferences, women_preferences, &time_gale_shapley, &time_find_all_rotations, &time_overhead, &time_kernel, &time_recursive_search, &time_total);
+            results = all_stable_matchings_times_CUDA(n, men_preferences, women_preferences, &time_gale_shapley, &time_find_all_rotations, &time_overhead, &time_kernel, &time_overhead_kernel, &time_recursive_search, &time_total);
         } else {
             // Time measure
             std::chrono::steady_clock::time_point start_time;
@@ -73,9 +74,9 @@ int main(int argc, char* argv[]) {
         }
 
         if (strcmp(argv[3], "times") == 0) {
-            fprintf(file, "%i\t\t\t\t%i\t\t\t\t\t%i\t\t\t%i\t\t%i\t\t\t\t\t%i\n", time_gale_shapley, time_find_all_rotations, time_overhead, time_kernel, time_recursive_search, time_total);
+            fprintf(file, "%i %i %i %i %i %i %i\n", time_gale_shapley, time_find_all_rotations, time_overhead, time_kernel, time_overhead_kernel, time_recursive_search, time_total);
         } else {
-            fprintf(file, "%i\t%i\t%i\n", time, number_of_results, n);
+            fprintf(file, "%i %i %i\n", time, number_of_results, n);
         }
 
         free(men_preferences);
