@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
     int time_total;
 
     if (strcmp(argv[3], "times") == 0) {
-        fprintf(file, "Gale-Shapley FindAllRotations Overhead Kernel Kernel+Overhead RecursiveSearch Total\n");
+        fprintf(file, "GaleShapley FindAllRotations Overhead Kernel KernelOverhead RecursiveSearch Total\n");
     }
 
     for(int i = 0; i < iterations; i++){
@@ -87,5 +87,6 @@ int main(int argc, char* argv[]) {
 
     fclose(file);
     fclose(file);
+    printf("\n");
     return 0;
 }
