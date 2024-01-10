@@ -59,4 +59,7 @@ dkms.conf
 codice_c/out.txt
 codice_c/out*.txt
 
+codice_C/output/serial_tests/*
+codice_C/output/parallel_tests/*
+
 codice_C/error.txt

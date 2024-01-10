@@ -26,7 +26,6 @@ int main(int argc, char* argv[]) {
     struct ResultsList* results_parallel;
     struct ResultsListElement* list_el_serial;
     struct ResultsListElement* list_el_parallel;
-    FILE* f = fopen("error.txt", "w");
 
     for(int i = 0; i < iterations; i++) {
         men_preferences = make_random_preferences(n);
@@ -99,5 +98,6 @@ int main(int argc, char* argv[]) {
         free_results(results_parallel);
         printf("\nCompleted test %i of %i", i+1, iterations);
     }
+    printf("\n");
     return 0;
 }
