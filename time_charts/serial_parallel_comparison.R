@@ -126,29 +126,41 @@ plot2 +
 
 
 #COMPARAZIONE 3 - TEMPI TOTALI VS.ALGORITMO EFFETTIVO E OVERHEAD
-#DA RIFARE!
-tot <- data.frame()
+parallel_data <- data.frame()
+#reading files and computing means for each test
+means <- data.frame()
 for (i in 1:10) {
   parallel_data <- read.table(parallel_paths[i], header=TRUE, sep=" ")
   parallel_data <- parallel_data[-c(1),]
-  mean_effective_algorithm <- c(mean(parallel_data$GaleShapley) + 
-                     mean(parallel_data$FindAllRotations) + 
-                     mean(parallel_data$Kernel) + 
-                     mean(parallel_data$RecursiveSearch))
-  r <- c(500*i, mean(parallel_data$Overhead), mean_effective_algorithm, mean(parallel_data$Total))
-  tot <- rbind(tot, r)
+  mean <- c((mean(parallel_data$GaleShapley) + 
+              mean(parallel_data$FindAllRotations) + 
+              mean(parallel_data$Kernel) + 
+              mean(parallel_data$RecursiveSearch)) / 4,
+              mean(parallel_data$Overhead))
+  means <- rbind(means, mean)
 }
-colnames(tot) <- c("instance_dim", "mean_overhead", "mean_effective_algorithm", "mean_all")
-tot
+colnames(means) <- c("mean_effective", "mean_overhead")
+means
+
+#preparing data for area plot
+categories <- c("Effective", "Overhead")
+plot_frame <- data.frame()
+for (i in 1:10) {
+  for (j in 1:2) {
+    r <- c(instances_dim[i], categories[j], means[i,j])
+    plot_frame <- rbind(plot_frame, r)
+  }
+}
+colnames(plot_frame) <- c("instances_dim", "category", "time")
+plot_frame$instances_dim <- as.integer(plot_frame$instances_dim)
+plot_frame$time <- as.integer(plot_frame$time)
+plot_frame
 
 #plotting
-plot1 <- ggplot(tot, aes(x = instance_dim)) +
+plot <- ggplot(plot_frame, aes(x=instances_dim, y=time, fill=category))
+plot + 
+  geom_area(colour="black", lwd=.4, alpha=.7) +
   theme_bw() +
   scale_x_continuous(breaks=seq(500,5000,500)) +
-  ggtitle("Distinzione tra tempo totale effettivo e tempo di overhead versione parallela") +
-  labs(x="Dimensione instanze", y="Tempi (ms)") +
-  geom_line(aes(y = mean_all, color = 'Totale'), lwd=1) + 
-  geom_line(aes(y = mean_effective_algorithm, color = 'Effettivo'), lwd=1) +
-  geom_line(aes(y = mean_overhead, color = 'Overhead'), lwd=1) +
-  scale_color_manual('Versioni', values=c('red', 'steelblue', 'black'))
-plot1
+  ggtitle("Comparazione tempo effettivo e di overhead (parallela)") +
+  labs(x="Dimensione instanze", y="Tempi (ms)", fill = 'Categorie')
