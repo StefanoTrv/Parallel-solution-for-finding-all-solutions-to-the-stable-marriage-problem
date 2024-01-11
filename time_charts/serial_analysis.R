@@ -1,6 +1,6 @@
 data <- list()
 
-paths <- list.files(path = ".../Parallel-solution-for-finding-all-solutions-to-the-stable-marriage-problem/time_charts/serial_intro", pattern = ".txt", full.names = TRUE)
+paths <- list.files(path = "Parallel-solution-for-finding-all-solutions-to-the-stable-marriage-problem/time_charts/serial_intro", pattern = ".txt", full.names = TRUE)
 temp <- paths[8]
 for (i in 8:2) {
   paths[i] <- paths[i-1] 

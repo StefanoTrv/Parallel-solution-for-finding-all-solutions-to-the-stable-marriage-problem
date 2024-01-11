@@ -172,7 +172,7 @@ struct ResultsList* all_stable_matchings_times_CUDA(int n, int* men_preferences,
 	end_time = std::chrono::steady_clock::now();
 	*time_overhead_kernel = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
 	*time_overhead = *time_overhead_kernel - *time_kernel;
-	*time_total += *time_overhead;
+	*time_total += *time_overhead_kernel;
 	//FINE SEZIONE PARALLELIZZATA
 
 	//calcolo la lista delle rotazioni libere

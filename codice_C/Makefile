@@ -3,8 +3,7 @@ NVCC = nvcc
 #CUDAFLAGS = set your hw flags here
 SEED = $(seed)
 
-DEF_ITERATIONS_SER = 50
-DEF_ITERATIONS_PAR = 51
+DEF_ITERATIONS = 51
 
 
 #To test serial version with single instances from a .txt file. Examples can be found in \tests\.	
@@ -32,7 +31,7 @@ endif
 
 #To launch multiple pseudo-random tests genarated on serial version, starting from instance=500, step=500. Useful for time analysis.
 serial_analysis: tester.o
-	for %%i in (500 1000 1500 2000 2500 3000 3500 4000 4500 5000) do .\tester %%i $(DEF_ITERATIONS_SER) times output\serial_tests\%%i.txt
+	for %%i in (500 1000 1500 2000 2500 3000 3500 4000 4500 5000) do .\tester %%i $(DEF_ITERATIONS) times output\serial_tests\%%i.txt
 	
 
 #To test parallel version with single instances from a .txt file. Examples can be found in \tests\.	
@@ -60,7 +59,7 @@ endif
 
 #To launch multiple pseudo-random tests genarated on parallel version, starting from instance=500, step=500. Useful for time analysis.
 parallel_analysis: CUDA_tester.o
-	for %%i in (500 1000 1500 2000 2500 3000 3500 4000 4500 5000) do .\CUDAtester %%i $(DEF_ITERATIONS_PAR) times output\parallel_tests\%%i.txt
+	for %%i in (500 1000 1500 2000 2500 3000 3500 4000 4500 5000) do .\CUDAtester %%i $(DEF_ITERATIONS) times output\parallel_tests\%%i.txt
 
 
 #To test both versions
@@ -82,7 +81,7 @@ endif
 #A demo. For $(DEF_ITERATIONS) times, it launches %%i pseudo-random generated instance on solutions_comparator, which means first calling
 #serial and then parallel version. After that, both results are compared each other. If any errors are found, they will be printed on prompt.
 demo: solutions_comparator.o
-	for %%i in (500 1000 1500 2000 2500 3000 3500 4000) do .\solutions_comparator %%i $(DEF_ITERATIONS) default
+	for %%i in (500 1000 1500 2000 2500 3000 3500 4000) do .\solutions_comparator %%i 50 default
 
 
 clean:
