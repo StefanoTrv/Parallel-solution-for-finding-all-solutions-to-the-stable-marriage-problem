@@ -135,7 +135,7 @@ for (i in 1:10) {
   mean <- c((mean(parallel_data$GaleShapley) + 
               mean(parallel_data$FindAllRotations) + 
               mean(parallel_data$Kernel) + 
-              mean(parallel_data$RecursiveSearch)) / 4,
+              mean(parallel_data$RecursiveSearch)),
               mean(parallel_data$Overhead))
   means <- rbind(means, mean)
 }
