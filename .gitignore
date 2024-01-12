@@ -56,10 +56,10 @@ dkms.conf
 .vs/*
 
 #File di output
-codice_c/out.txt
-codice_c/out*.txt
+src/out.txt
+src/out*.txt
 
-codice_C/output/serial_tests/*
-codice_C/output/parallel_tests/*
+src/output/serial_tests/*
+src/output/parallel_tests/*
 
-codice_C/error.txt
+src/error.txt
